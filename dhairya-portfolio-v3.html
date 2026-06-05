@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dhairya Srivastava — Senior UX Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Special+Elite&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --blue:     #7B9EB5;
+  --blue-lt:  #B8CEDC;
+  --blue-pale:#D6E4ED;
+  --blue-mist:#EBF2F7;
+  --cream:    #F4EFE6;
+  --paper:    #FAF7F2;
+  --paper2:   #F0EBE1;
+  --ink:      #1C1F24;
+  --ink2:     #3A3D42;
+  --mid:      #7A7D82;
+  --border:   #D8D3CA;
+  --serif:    'Cormorant Garamond',Georgia,serif;
+  --inst:     'Instrument Serif',Georgia,serif;
+  --sans:     'DM Sans',system-ui,sans-serif;
+  --type:     'Special Elite',monospace;
+}
+
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);overflow-x:hidden;cursor:none}
+
+/* GRAIN OVERLAY */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23g)' opacity='0.028'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9000;opacity:1
+}
+
+/* ═══ CURSOR ═══ */
+#cur{
+  position:fixed;width:10px;height:10px;
+  background:var(--ink);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width .25s cubic-bezier(.16,1,.3,1),
+             height .25s cubic-bezier(.16,1,.3,1),
+             background .2s,border-radius .2s
+}
+#cur.on-link{width:44px;height:44px;background:var(--blue);mix-blend-mode:multiply;border-radius:50%}
+#cur.on-text{width:3px;height:28px;border-radius:2px;background:var(--ink)}
+
+/* ═══ LOADER ═══ */
+#loader{
+  position:fixed;inset:0;background:var(--ink);z-index:9998;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px
+}
+.ld-eyebrow{font-family:var(--type);font-size:10px;letter-spacing:.4em;color:rgba(235,242,247,.3);text-transform:uppercase;animation:ldpulse 3s ease forwards}
+.ld-name{font-family:var(--serif);font-size:52px;color:var(--paper);font-weight:300;letter-spacing:.02em;opacity:0;animation:ldup 1s ease .2s forwards}
+.ld-name em{font-style:italic;color:var(--blue-lt)}
+.ld-bar-track{width:220px;height:1px;background:rgba(235,242,247,.12);position:relative;overflow:hidden}
+.ld-bar-track::after{content:'';position:absolute;left:-100%;top:0;height:100%;width:100%;background:var(--blue-lt);animation:ldbar 2.4s cubic-bezier(.4,0,.2,1) .3s forwards}
+.ld-sub{font-family:var(--type);font-size:8px;letter-spacing:.35em;color:rgba(235,242,247,.2);text-transform:uppercase;animation:ldpulse 3s ease .2s forwards}
+@keyframes ldpulse{0%{opacity:0}20%{opacity:1}85%{opacity:1}100%{opacity:0}}
+@keyframes ldup{0%{opacity:0;transform:translateY(16px)}30%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+@keyframes ldbar{from{left:-100%}to{left:100%}}
+#loader.gone{animation:ldout .5s ease forwards;pointer-events:none}
+@keyframes ldout{to{opacity:0;transform:scale(1.02)}}
+
+/* ═══ NAV ═══ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  padding:26px 64px;display:flex;justify-content:space-between;align-items:center;
+  transition:background .4s,border-color .4s;border-bottom:1px solid transparent
+}
+nav.stuck{background:rgba(250,247,242,.9);backdrop-filter:blur(16px);border-color:var(--border)}
+.n-logo{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.04em;color:var(--ink);text-decoration:none}
+.n-logo span{font-style:italic;color:var(--blue)}
+.n-links{display:flex;gap:40px;list-style:none}
+.n-links a{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);text-decoration:none;opacity:.4;transition:opacity .2s}
+.n-links a:hover{opacity:1}
+.n-cta{
+  font-family:var(--type);font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--paper);background:var(--ink);padding:9px 18px;text-decoration:none;
+  border:1px solid var(--ink);transition:background .2s,color .2s
+}
+.n-cta:hover{background:var(--blue);border-color:var(--blue)}
+
+/* ═══ HERO ═══ */
+.hero{
+  min-height:100vh;padding:0 64px 72px;
+  display:grid;grid-template-rows:1fr auto;
+  position:relative;overflow:hidden;
+  background:var(--paper)
+}
+
+/* Big decorative number */
+.hero-bignum{
+  position:absolute;right:-24px;bottom:40px;
+  font-family:var(--serif);font-size:clamp(240px,34vw,480px);font-weight:700;
+  line-height:.85;color:transparent;
+  -webkit-text-stroke:1.5px var(--blue-pale);
+  pointer-events:none;user-select:none;
+  animation:numfloat 10s ease-in-out infinite
+}
+@keyframes numfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+
+/* Blue accent band top-left */
+.hero-band{
+  position:absolute;top:0;left:0;width:6px;height:100%;
+  background:linear-gradient(to bottom,var(--blue-pale),var(--blue-lt),var(--blue-pale));
+  opacity:.5
+}
+
+.hero-content{
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding-top:120px;position:relative;z-index:2
+}
+
+.hero-eyebrow{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:36px;
+  opacity:0;animation:up .8s ease .4s forwards
+}
+.hero-eyebrow-pill{
+  font-family:var(--type);font-size:8px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--blue);border:1px solid var(--blue-lt);padding:5px 12px;
+  background:var(--blue-mist)
+}
+.hero-eyebrow-line{width:40px;height:1px;background:var(--border)}
+.hero-eyebrow-txt{font-family:var(--type);font-size:8px;letter-spacing:.25em;color:var(--mid);text-transform:uppercase}
+
+.hero-h1{position:relative}
+.h1-row{overflow:hidden;display:block}
+.h1-inner{
+  display:block;
+  font-family:var(--serif);font-weight:300;line-height:.9;
+  font-size:clamp(80px,12vw,172px);letter-spacing:-.02em;
+  transform:translateY(100%);
+  animation:slideup .95s cubic-bezier(.16,1,.3,1) forwards
+}
+.h1-inner.r2{animation-delay:.15s;font-style:italic;color:var(--blue)}
+.h1-inner.r3{animation-delay:.28s;font-weight:600}
+@keyframes slideup{to{transform:translateY(0)}}
+
+.hero-sub{
+  display:grid;grid-template-columns:auto 1px auto auto;gap:32px;
+  align-items:center;margin-top:52px;
+  opacity:0;animation:up .9s ease .7s forwards
+}
+.hero-sub-title{font-family:var(--inst);font-size:17px;font-style:italic;color:var(--mid)}
+.hero-sub-div{height:40px;background:var(--border)}
+.hero-sub-desc{font-size:13px;color:var(--mid);line-height:1.75;max-width:300px}
+.hero-stats{display:flex;gap:32px;margin-left:auto}
+.stat-n{font-family:var(--serif);font-size:36px;font-weight:300;display:block;line-height:1}
+.stat-l{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);display:block;margin-top:4px}
+
+.hero-foot{
+  border-top:1px solid var(--border);padding-top:22px;
+  display:flex;justify-content:space-between;align-items:center;
+  position:relative;z-index:2;
+  opacity:0;animation:up .8s ease 1s forwards
+}
+.hero-scroll{display:flex;align-items:center;gap:14px;font-family:var(--type);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--mid)}
+.scroll-bar{width:48px;height:1px;background:var(--border);position:relative;overflow:hidden}
+.scroll-bar::after{content:'';position:absolute;left:-100%;top:0;width:100%;height:100%;background:var(--blue);animation:scpulse 2.2s ease 2s infinite}
+@keyframes scpulse{0%{left:-100%}100%{left:100%}}
+.hero-location{font-family:var(--type);font-size:9px;letter-spacing:.2em;color:var(--mid);text-transform:uppercase}
+
+/* ═══ MARQUEE ═══ */
+.marquee{
+  background:var(--blue-pale);border-top:1px solid var(--blue-lt);border-bottom:1px solid var(--blue-lt);
+  padding:14px 0;overflow:hidden
+}
+.m-track{display:flex;animation:mq 22s linear infinite;white-space:nowrap}
+.m-item{
+  display:inline-flex;align-items:center;gap:24px;padding:0 24px;
+  font-family:var(--type);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--blue)
+}
+.m-sep{width:4px;height:4px;background:var(--blue-lt);border-radius:50%;flex-shrink:0}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ═══ MANIFESTO ═══ */
+.manifesto{
+  padding:110px 64px;display:grid;
+  grid-template-columns:220px 1fr;gap:80px;
+  max-width:1400px;margin:0 auto
+}
+.man-aside{padding-top:6px}
+.man-aside-label{font-family:var(--type);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:20px}
+.man-aside-ref{font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);line-height:1.6}
+.man-body{}
+.man-quote{
+  font-family:var(--serif);font-size:clamp(26px,3.5vw,44px);
+  font-weight:300;line-height:1.4;color:var(--ink)
+}
+.man-quote em{font-style:italic;color:var(--blue)}
+.man-quote strong{font-weight:600}
+.man-body-text{
+  margin-top:28px;font-size:14px;color:var(--mid);
+  line-height:1.85;max-width:540px;border-left:2px solid var(--blue-pale);padding-left:20px
+}
+
+/* ═══ CASSETTE INTERLUDE ═══ */
+.cassette-belt{
+  background:var(--ink);padding:80px 64px;
+  display:grid;grid-template-columns:1fr 400px;gap:80px;
+  align-items:center;overflow:hidden;position:relative
+}
+.cb-bg{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    90deg,
+    transparent 0px,transparent 39px,
+    rgba(235,242,247,.025) 40px,rgba(235,242,247,.025) 40px
+  );
+  pointer-events:none
+}
+.cb-text{}
+.cb-label{font-family:var(--type);font-size:9px;letter-spacing:.3em;color:rgba(235,242,247,.25);text-transform:uppercase;margin-bottom:20px;display:block}
+.cb-headline{font-family:var(--serif);font-size:clamp(36px,5vw,60px);color:var(--paper);font-weight:300;line-height:1.15}
+.cb-headline em{font-style:italic;color:var(--blue-lt)}
+.cb-body{margin-top:20px;font-size:13px;color:rgba(235,242,247,.45);line-height:1.8;max-width:420px}
+.cb-skills{margin-top:32px;display:flex;flex-wrap:wrap;gap:8px}
+.cb-skill{
+  font-family:var(--type);font-size:8px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(235,242,247,.4);border:1px solid rgba(235,242,247,.12);padding:5px 12px
+}
+
+/* CASSETTE SVG */
+.cassette-wrap{position:relative;display:flex;justify-content:center;align-items:center}
+.cass-svg{width:100%;max-width:400px;filter:drop-shadow(0 24px 48px rgba(0,0,0,.5));animation:cfl 5s ease-in-out infinite}
+@keyframes cfl{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-14px) rotate(1.5deg)}}
+.reel-a{transform-origin:126px 174px;animation:rspin 3.2s linear infinite}
+.reel-b{transform-origin:274px 174px;animation:rspin 3.2s linear infinite reverse}
+@keyframes rspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* ═══ WORK / ARCHIVE ═══ */
+.work-wrap{padding:0 64px 100px;max-width:1400px;margin:0 auto}
+
+.sec-head{
+  display:grid;grid-template-columns:220px 1fr auto;
+  align-items:baseline;gap:60px;
+  border-top:1px solid var(--border);padding-top:36px;margin-bottom:60px
+}
+.sec-aside{font-family:var(--type);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--mid)}
+.sec-aside span{display:block;color:var(--blue-lt);margin-top:5px;font-size:8px}
+.sec-h{font-family:var(--serif);font-size:30px;font-weight:300}
+.sec-count{font-family:var(--type);font-size:10px;color:var(--mid)}
+
+/* Case files */
+.cf-list{display:flex;flex-direction:column}
+.cf{
+  display:grid;grid-template-columns:220px 52px 1fr 100px;
+  gap:0 16px;align-items:start;padding:32px 0;
+  border-top:1px solid var(--border);
+  text-decoration:none;color:inherit;
+  position:relative;cursor:none;
+  transition:background .35s
+}
+.cf:last-child{border-bottom:1px solid var(--border)}
+.cf::before{
+  content:'';position:absolute;left:-64px;right:-64px;top:0;bottom:0;
+  background:var(--blue-mist);opacity:0;transition:opacity .4s;z-index:-1
+}
+.cf:hover::before{opacity:1}
+
+.cf-file{font-family:var(--type);font-size:9px;letter-spacing:.18em;color:var(--mid);padding-top:5px}
+.cf-i{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--blue-lt);padding-top:2px;transition:color .25s}
+.cf:hover .cf-i{color:var(--blue)}
+.cf-body{}
+.cf-t{font-family:var(--serif);font-size:21px;font-weight:400;line-height:1.2;margin-bottom:10px;transition:color .2s}
+.cf:hover .cf-t{color:var(--blue)}
+.cf-d{font-size:12px;color:var(--mid);line-height:1.7;max-width:460px;margin-bottom:12px}
+.cf-tags{display:flex;flex-wrap:wrap;gap:5px}
+.cf-tag{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);border:1px solid var(--blue-pale);padding:3px 8px;background:var(--blue-mist)}
+.cf-rt{text-align:right;padding-top:4px}
+.cf-yr{font-family:var(--type);font-size:10px;color:var(--mid);display:block;margin-bottom:8px}
+.cf-arr{font-size:18px;color:var(--blue-lt);display:block;transition:color .2s,transform .22s}
+.cf:hover .cf-arr{color:var(--blue);transform:translate(3px,-3px)}
+
+/* ═══ TICKET ROW ═══ */
+.ticket-row{
+  padding:0 64px 100px;max-width:1400px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px
+}
+.ticket{
+  border:1px solid var(--border);background:var(--paper);
+  display:grid;grid-template-columns:1fr 80px;
+  position:relative;overflow:hidden;cursor:none;
+  transition:transform .3s ease,box-shadow .3s ease
+}
+.ticket::after{
+  content:'';position:absolute;
+  left:calc(100% - 80px - 1px);top:-10px;bottom:-10px;
+  border-left:2px dashed var(--blue-pale);
+  pointer-events:none
+}
+.ticket:hover{transform:translateY(-5px);box-shadow:0 12px 32px rgba(123,158,181,.15)}
+.ticket-left{padding:22px 20px}
+.ticket-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.ticket-from{font-family:var(--type);font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid)}
+.ticket-logo{font-family:var(--serif);font-size:11px;font-style:italic;color:var(--blue)}
+.ticket-main-title{font-family:var(--serif);font-size:18px;font-weight:600;line-height:1.2;margin-bottom:6px}
+.ticket-sub{font-size:11px;color:var(--mid);line-height:1.5}
+.ticket-foot{margin-top:14px;display:flex;gap:12px}
+.tf-block{font-family:var(--type);font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--mid)}
+.tf-block strong{display:block;font-size:10px;color:var(--ink);margin-bottom:2px;font-family:var(--sans)}
+.ticket-right{
+  background:var(--blue-mist);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;
+  writing-mode:vertical-lr;padding:16px 8px
+}
+.ticket-right-txt{font-family:var(--type);font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue)}
+.ticket-barcode{display:flex;gap:1px;height:50px;align-items:stretch}
+.tbc-bar{background:var(--blue);opacity:.6}
+.ticket-num{font-family:var(--type);font-size:8px;color:var(--blue);letter-spacing:.08em}
+
+/* ═══ NOTES / ABOUT ═══ */
+.notes-section{
+  background:var(--ink);padding:100px 64px;position:relative;overflow:hidden
+}
+.notes-section::before{
+  content:'NOTES';position:absolute;
+  right:-60px;top:50%;transform:translateY(-50%);
+  font-family:var(--serif);font-size:260px;font-weight:700;
+  color:transparent;-webkit-text-stroke:1px rgba(235,242,247,.04);
+  pointer-events:none;user-select:none;white-space:nowrap
+}
+.notes-grid{
+  max-width:1400px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start
+}
+.nl .nl-label{font-family:var(--type);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(235,242,247,.2);display:block;margin-bottom:28px}
+.nl-headline{font-family:var(--serif);font-size:clamp(40px,5.5vw,68px);color:var(--paper);font-weight:300;line-height:1.05}
+.nl-headline em{font-style:italic;color:var(--blue-lt)}
+.nl-body{font-size:13px;color:rgba(235,242,247,.45);line-height:1.85;margin-top:28px;max-width:400px}
+.nl-body strong{color:var(--paper);font-weight:400}
+.nl-profile{
+  margin-top:40px;padding:24px;border:1px solid rgba(235,242,247,.08);
+  background:rgba(235,242,247,.03);display:flex;flex-direction:column;gap:12px
+}
+.nlp-row{display:flex;justify-content:space-between;align-items:baseline}
+.nlp-label{font-family:var(--type);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(235,242,247,.2)}
+.nlp-val{font-size:12px;color:rgba(235,242,247,.55)}
+
+.nr{display:flex;flex-direction:column;gap:0}
+.note-card{border-top:1px solid rgba(235,242,247,.07);padding:26px 0}
+.note-card:last-child{border-bottom:1px solid rgba(235,242,247,.07)}
+.nc-date{font-family:var(--type);font-size:8px;letter-spacing:.22em;color:rgba(235,242,247,.2);text-transform:uppercase;margin-bottom:10px}
+.nc-title{font-family:var(--serif);font-size:18px;color:var(--paper);font-weight:400;margin-bottom:8px}
+.nc-text{font-size:12px;color:rgba(235,242,247,.4);line-height:1.75}
+.nc-text strong{color:rgba(235,242,247,.7);font-weight:400}
+.book-row{display:flex;gap:10px;align-items:baseline;font-size:12px;color:rgba(235,242,247,.35);margin-top:6px}
+.book-row::before{content:'→';color:rgba(235,242,247,.15);font-size:11px;flex-shrink:0}
+.book-row em{font-style:italic;color:rgba(235,242,247,.5)}
+
+/* ═══ FILM STRIP ═══ */
+.film-wrap{overflow:hidden;background:var(--blue-pale);padding:0;border-top:1px solid var(--blue-lt);border-bottom:1px solid var(--blue-lt)}
+.film-track{display:flex;animation:fmv 24s linear infinite;width:max-content}
+.film-track:hover{animation-play-state:paused}
+.frame{width:210px;flex-shrink:0;background:var(--ink);border-left:10px solid #0d0d0d;border-right:10px solid #0d0d0d}
+.perfs{display:flex;padding:4px 0;background:#0a0a0a}
+.perf{width:18px;height:13px;border-radius:2px;background:var(--ink);margin:2px 5px;flex-shrink:0}
+.frame-img{
+  height:130px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:6px;
+  background:var(--ink);position:relative;overflow:hidden
+}
+.frame-img::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.008) 3px,rgba(255,255,255,.008) 4px);
+  pointer-events:none;z-index:2
+}
+.frame-num{font-family:var(--type);font-size:8px;color:rgba(235,242,247,.2);letter-spacing:.2em;z-index:3}
+.frame-title{font-family:var(--serif);font-size:15px;font-style:italic;color:rgba(235,242,247,.65);z-index:3;text-align:center;padding:0 8px}
+.frame-year{font-family:var(--type);font-size:7px;color:rgba(123,158,181,.5);letter-spacing:.15em;z-index:3}
+.frame-label{font-family:var(--type);font-size:7px;color:rgba(235,242,247,.2);letter-spacing:.15em;text-align:center;padding:6px 4px;background:#0a0a0a;text-transform:uppercase}
+@keyframes fmv{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ═══ PROCESS ═══ */
+.process-wrap{padding:100px 64px;max-width:1400px;margin:0 auto}
+.process-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:56px}
+.p-step{
+  padding:40px 36px;border-left:1px solid var(--border);
+  position:relative;transition:background .3s
+}
+.p-step:first-child{border-left:none}
+.p-step:hover{background:var(--blue-mist)}
+.p-step::after{
+  content:'';position:absolute;top:40px;left:36px;
+  width:32px;height:1px;background:var(--blue-lt)
+}
+.p-num{font-family:var(--type);font-size:9px;letter-spacing:.3em;color:var(--blue-lt);margin-bottom:40px}
+.p-title{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.25;margin-bottom:16px}
+.p-text{font-size:13px;color:var(--mid);line-height:1.75}
+
+/* ═══ CONTACT ═══ */
+.contact{padding:0 64px 0;background:var(--ink);position:relative;overflow:hidden}
+.contact::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--blue)}
+.contact-inner{max-width:1400px;margin:0 auto;padding:100px 0 80px;display:grid;grid-template-columns:1fr auto;gap:80px;align-items:end}
+.ct-label{font-family:var(--type);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(235,242,247,.2);display:block;margin-bottom:28px}
+.ct-h{font-family:var(--serif);font-size:clamp(36px,5.5vw,68px);color:var(--paper);font-weight:300;line-height:1.1}
+.ct-h em{font-style:italic;color:var(--blue-lt)}
+.ct-email{
+  display:inline-block;margin-top:28px;
+  font-family:var(--serif);font-size:19px;font-style:italic;color:rgba(235,242,247,.45);
+  text-decoration:none;border-bottom:1px solid rgba(235,242,247,.15);
+  padding-bottom:3px;transition:color .2s,border-color .2s
+}
+.ct-email:hover{color:var(--paper);border-color:rgba(235,242,247,.4)}
+.ct-right{display:flex;flex-direction:column;gap:16px;align-items:flex-end}
+.ct-link{font-family:var(--type);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(235,242,247,.25);text-decoration:none;transition:color .2s}
+.ct-link:hover{color:var(--blue-lt)}
+
+footer{
+  background:var(--ink);border-top:1px solid rgba(235,242,247,.06);
+  padding:24px 64px;display:flex;justify-content:space-between;align-items:center
+}
+.f-l{font-family:var(--type);font-size:9px;color:rgba(235,242,247,.18);letter-spacing:.05em}
+.f-r{font-family:var(--inst);font-size:12px;font-style:italic;color:rgba(235,242,247,.18)}
+
+/* UTILS */
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .9s ease,transform .9s ease}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.12s}.d2{transition-delay:.24s}.d3{transition-delay:.36s}
+
+@media(max-width:960px){
+  nav{padding:20px 24px}.n-links{display:none}
+  .hero{padding:0 24px 56px}
+  .hero-bignum{font-size:40vw;right:-12px}
+  .hero-sub{grid-template-columns:1fr;gap:16px}
+  .hero-sub-div,.hero-stats{display:none}
+  .manifesto,.work-wrap,.process-wrap{padding:60px 24px}
+  .manifesto{grid-template-columns:1fr;gap:20px}
+  .sec-head{grid-template-columns:1fr auto;gap:16px}
+  .sec-aside{display:none}
+  .cf{grid-template-columns:1fr;gap:6px}.cf-file,.cf-i,.cf-rt{display:none}
+  .ticket-row{grid-template-columns:1fr;padding:0 24px 60px}
+  .cassette-belt{grid-template-columns:1fr;padding:60px 24px;gap:40px}
+  .notes-section{padding:60px 24px}.notes-grid{grid-template-columns:1fr}
+  .process-grid{grid-template-columns:1fr}.p-step{border-left:none;border-top:1px solid var(--border)}
+  .contact{padding:0 24px}.contact-inner{grid-template-columns:1fr;gap:32px}.ct-right{align-items:flex-start}
+  footer{padding:20px 24px;flex-direction:column;gap:8px}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-eyebrow">Portfolio Archive · Vol. I</div>
+  <div class="ld-name">Dhairya <em>Srivastava</em></div>
+  <div class="ld-bar-track"></div>
+  <div class="ld-sub">Senior UX Designer · Est. 2019</div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="n-logo">D.<span>S.</span></a>
+  <ul class="n-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#notes">Notes</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="https://drive.google.com/file/d/1-WvdgOrHnpVmPa6uoqYHw4D8xCSVMUhx/view" target="_blank" class="n-cta">Résumé ↗</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-band"></div>
+  <div class="hero-bignum">UX</div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-pill">Senior UX Designer</span>
+      <div class="hero-eyebrow-line"></div>
+      <span class="hero-eyebrow-txt">Archive · 2025 · Mumbai</span>
+    </div>
+
+    <h1 class="hero-h1">
+      <span class="h1-row"><span class="h1-inner">Dhairya</span></span>
+      <span class="h1-row"><span class="h1-inner r2">Srivastava</span></span>
+    </h1>
+
+    <div class="hero-sub">
+      <p class="hero-sub-title">Product Storyteller &amp; Systems Thinker</p>
+      <div class="hero-sub-div"></div>
+      <p class="hero-sub-desc">Designing AI-powered enterprise experiences and thoughtful digital systems that turn complexity into clarity.</p>
+      <div class="hero-stats">
+        <div><span class="stat-n">6</span><span class="stat-l">Years</span></div>
+        <div><span class="stat-n">40+</span><span class="stat-l">Projects</span></div>
+        <div><span class="stat-n">B2B</span><span class="stat-l">+ B2C</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-foot">
+    <div class="hero-scroll">
+      <div class="scroll-bar"></div>
+      Scroll to explore
+    </div>
+    <span class="hero-location">Mumbai, India · Available for new work</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="m-track">
+    <span class="m-item">UX Design<span class="m-sep"></span></span>
+    <span class="m-item">Product Strategy<span class="m-sep"></span></span>
+    <span class="m-item">Design Systems<span class="m-sep"></span></span>
+    <span class="m-item">User Research<span class="m-sep"></span></span>
+    <span class="m-item">0→1 Launches<span class="m-sep"></span></span>
+    <span class="m-item">Enterprise UX<span class="m-sep"></span></span>
+    <span class="m-item">AI Experiences<span class="m-sep"></span></span>
+    <span class="m-item">Workshop Facilitation<span class="m-sep"></span></span>
+    <span class="m-item">Figma<span class="m-sep"></span></span>
+    <span class="m-item">UX Design<span class="m-sep"></span></span>
+    <span class="m-item">Product Strategy<span class="m-sep"></span></span>
+    <span class="m-item">Design Systems<span class="m-sep"></span></span>
+    <span class="m-item">User Research<span class="m-sep"></span></span>
+    <span class="m-item">0→1 Launches<span class="m-sep"></span></span>
+    <span class="m-item">Enterprise UX<span class="m-sep"></span></span>
+    <span class="m-item">AI Experiences<span class="m-sep"></span></span>
+    <span class="m-item">Workshop Facilitation<span class="m-sep"></span></span>
+    <span class="m-item">Figma<span class="m-sep"></span></span>
+  </div>
+</div>
+
+<!-- MANIFESTO -->
+<section class="manifesto reveal">
+  <div class="man-aside">
+    <span class="man-aside-label">§ 001 · Manifesto</span>
+    <p class="man-aside-ref">"Design is not<br>how it looks.<br>It is how<br>it works."</p>
+  </div>
+  <div class="man-body">
+    <p class="man-quote">
+      Good design is not decoration —<br>
+      it is <em>a point of view.</em><br>
+      <strong>Restraint is a superpower.</strong>
+    </p>
+    <p class="man-body-text">After six years untangling complexity for leading international clients, I've learned that the finest interfaces disappear entirely, leaving only the human experience behind. Every pixel carries weight. Every interaction is a conversation.</p>
+  </div>
+</section>
+
+<!-- CASSETTE / IDENTITY CARD -->
+<div class="cassette-belt">
+  <div class="cb-bg"></div>
+  <div class="cb-text reveal">
+    <span class="cb-label">§ 002 · About the designer</span>
+    <h2 class="cb-headline">Six years of<br>making the complex<br><em>feel effortless.</em></h2>
+    <p class="cb-body">From 0→1 product launches to enterprise AI platforms, I've worked with global brands to craft experiences that are both beautiful and genuinely useful. I believe aesthetic and function are never at odds.</p>
+    <div class="cb-skills">
+      <span class="cb-skill">Design Thinking</span>
+      <span class="cb-skill">User Research</span>
+      <span class="cb-skill">0→1 Products</span>
+      <span class="cb-skill">Design Systems</span>
+      <span class="cb-skill">Enterprise UX</span>
+      <span class="cb-skill">Figma</span>
+      <span class="cb-skill">Workshops</span>
+    </div>
+  </div>
+  <div class="cassette-wrap reveal d1">
+    <svg class="cass-svg" viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg">
+      <!-- Body shell -->
+      <rect x="4" y="18" width="392" height="214" rx="16" fill="#141414"/>
+      <rect x="10" y="24" width="380" height="202" rx="12" fill="#1e1e1e"/>
+      <!-- Top ridge -->
+      <rect x="10" y="24" width="380" height="5" rx="2" fill="rgba(255,255,255,.04)"/>
+      <!-- Label area -->
+      <rect x="58" y="46" width="284" height="130" rx="5" fill="#EBF2F7"/>
+      <rect x="62" y="50" width="276" height="122" rx="4" fill="#F4F8FB"/>
+      <!-- Label blue band top -->
+      <rect x="62" y="50" width="276" height="22" rx="4" fill="#B8CEDC"/>
+      <rect x="62" y="66" width="276" height="6" fill="#B8CEDC"/>
+      <!-- Label text -->
+      <text x="200" y="65" text-anchor="middle" font-family="Special Elite,monospace" font-size="9" fill="#2a4055" letter-spacing="3">DHAIRYA SRIVASTAVA</text>
+      <text x="200" y="100" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="22" fill="#1C1F24" letter-spacing="2" font-style="italic">UX Design</text>
+      <text x="200" y="118" text-anchor="middle" font-family="Special Elite,monospace" font-size="7" fill="#7B9EB5" letter-spacing="4">PORTFOLIO ARCHIVE · 2025</text>
+      <!-- Barcode -->
+      <rect x="80" y="130" width="2" height="28" fill="#7B9EB5" opacity=".5"/>
+      <rect x="84" y="130" width="1" height="28" fill="#7B9EB5" opacity=".5"/>
+      <rect x="87" y="130" width="3" height="28" fill="#7B9EB5" opacity=".5"/>
+      <rect x="92" y="130" width="1" height="28" fill="#7B9EB5" opacity=".5"/>
+      <rect x="95" y="130" width="2" height="28" fill="#7B9EB5" opacity=".5"/>
+      <rect x="99" y="130" width="1" height="28" fill="#7B9EB5" opacity=".5"/>
+      <rect x="102" y="130" width="3" height="28" fill="#7B9EB5" opacity=".5"/>
+      <rect x="107" y="130" width="2" height="28" fill="#7B9EB5" opacity=".5"/>
+      <rect x="111" y="130" width="1" height="28" fill="#7B9EB5" opacity=".5"/>
+      <text x="96" y="168" text-anchor="middle" font-family="Special Elite,monospace" font-size="6" fill="#7B9EB5" letter-spacing="1">DS-2025-001</text>
+      <!-- Side A -->
+      <text x="68" y="168" font-family="Special Elite,monospace" font-size="7" fill="#9AB5C8">SIDE A</text>
+      <text x="325" y="168" text-anchor="end" font-family="Special Elite,monospace" font-size="7" fill="#9AB5C8">60 MIN</text>
+      <!-- Window -->
+      <rect x="110" y="176" width="180" height="50" rx="5" fill="#111"/>
+      <rect x="114" y="180" width="172" height="42" rx="3" fill="#0d0d0d"/>
+      <!-- Reel A -->
+      <g class="reel-a">
+        <circle cx="126" cy="174" r="24" fill="#161616" stroke="#2a2a2a" stroke-width="1.5"/>
+        <circle cx="126" cy="174" r="15" fill="#111"/>
+        <circle cx="126" cy="174" r="5" fill="#2a2a2a"/>
+        <line x1="126" y1="159" x2="126" y2="152" stroke="#333" stroke-width="1.5"/>
+        <line x1="126" y1="189" x2="126" y2="196" stroke="#333" stroke-width="1.5"/>
+        <line x1="111" y1="174" x2="104" y2="174" stroke="#333" stroke-width="1.5"/>
+        <line x1="141" y1="174" x2="148" y2="174" stroke="#333" stroke-width="1.5"/>
+        <line x1="115" y1="163" x2="110" y2="157" stroke="#333" stroke-width="1.5"/>
+        <line x1="137" y1="185" x2="142" y2="191" stroke="#333" stroke-width="1.5"/>
+      </g>
+      <!-- Tape path -->
+      <path d="M 126 150 Q 200 140 274 150" stroke="#2a2a2a" stroke-width="1" fill="none"/>
+      <!-- Reel B -->
+      <g class="reel-b">
+        <circle cx="274" cy="174" r="24" fill="#161616" stroke="#2a2a2a" stroke-width="1.5"/>
+        <circle cx="274" cy="174" r="15" fill="#111"/>
+        <circle cx="274" cy="174" r="5" fill="#2a2a2a"/>
+        <line x1="274" y1="159" x2="274" y2="152" stroke="#333" stroke-width="1.5"/>
+        <line x1="274" y1="189" x2="274" y2="196" stroke="#333" stroke-width="1.5"/>
+        <line x1="259" y1="174" x2="252" y2="174" stroke="#333" stroke-width="1.5"/>
+        <line x1="289" y1="174" x2="296" y2="174" stroke="#333" stroke-width="1.5"/>
+        <line x1="263" y1="163" x2="258" y2="157" stroke="#333" stroke-width="1.5"/>
+        <line x1="285" y1="185" x2="290" y2="191" stroke="#333" stroke-width="1.5"/>
+      </g>
+      <!-- Corner screws -->
+      <circle cx="28" cy="40" r="6" fill="#161616" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="24" y1="40" x2="32" y2="40" stroke="#333" stroke-width=".8"/>
+      <line x1="28" y1="36" x2="28" y2="44" stroke="#333" stroke-width=".8"/>
+      <circle cx="372" cy="40" r="6" fill="#161616" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="368" y1="40" x2="376" y2="40" stroke="#333" stroke-width=".8"/>
+      <line x1="372" y1="36" x2="372" y2="44" stroke="#333" stroke-width=".8"/>
+      <circle cx="28" cy="218" r="6" fill="#161616" stroke="#2a2a2a" stroke-width="1"/>
+      <circle cx="372" cy="218" r="6" fill="#161616" stroke="#2a2a2a" stroke-width="1"/>
+      <!-- Play head slot -->
+      <rect x="182" y="214" width="36" height="6" rx="2" fill="#111" stroke="#2a2a2a" stroke-width=".5"/>
+    </svg>
+  </div>
+</div>
+
+<!-- WORK -->
+<section class="work-wrap" id="work">
+  <div class="sec-head reveal">
+    <span class="sec-aside">Case Files<span>§ 003</span></span>
+    <h2 class="sec-h">Selected Work</h2>
+    <span class="sec-count">07 archived</span>
+  </div>
+  <div class="cf-list">
+    <a href="https://www.figma.com/deck/ReZbSF3lGfeoQkdgqVWBCi" target="_blank" class="cf reveal">
+      <span class="cf-file">CASE FILE 001</span>
+      <span class="cf-i">I.</span>
+      <div class="cf-body">
+        <div class="cf-t">Sephora — Appointment Experience</div>
+        <div class="cf-d">UX-led strategy boosting loyalty and conversions, elevating Sephora as a trusted beauty mentor through deep personalisation.</div>
+        <div class="cf-tags"><span class="cf-tag">UX Strategy</span><span class="cf-tag">Personalisation</span><span class="cf-tag">B2C</span></div>
+      </div>
+      <div class="cf-rt"><span class="cf-yr">2024</span><span class="cf-arr">↗</span></div>
+    </a>
+    <a href="https://medium.com/@dhairya.stv/design-thinking-workshop-with-emirates-4b304c1509c1" target="_blank" class="cf reveal d1">
+      <span class="cf-file">CASE FILE 002</span>
+      <span class="cf-i">II.</span>
+      <div class="cf-body">
+        <div class="cf-t">Emirates — Beyond Flights</div>
+        <div class="cf-d">Integrating tours and activity offerings to boost engagement, create cross-selling opportunities and increase overall booking value.</div>
+        <div class="cf-tags"><span class="cf-tag">Design Thinking</span><span class="cf-tag">Travel</span><span class="cf-tag">Workshop</span></div>
+      </div>
+      <div class="cf-rt"><span class="cf-yr">2024</span><span class="cf-arr">↗</span></div>
+    </a>
+    <a href="https://www.figma.com/deck/ujitpQWZRkgajgAFAAXkoD/Carey-International" target="_blank" class="cf reveal d2">
+      <span class="cf-file">CASE FILE 003</span>
+      <span class="cf-i">III.</span>
+      <div class="cf-body">
+        <div class="cf-t">Carey International — Ride, Reimagined</div>
+        <div class="cf-d">Platform redesign delivering a seamless, intuitive experience that fosters confidence and long-term customer loyalty.</div>
+        <div class="cf-tags"><span class="cf-tag">Platform Redesign</span><span class="cf-tag">Mobility</span><span class="cf-tag">B2B</span></div>
+      </div>
+      <div class="cf-rt"><span class="cf-yr">2023</span><span class="cf-arr">↗</span></div>
+    </a>
+    <a href="https://www.figma.com/deck/OkyFJ53IbzvYgsQw7hj6bo/Short-projects-POC" target="_blank" class="cf reveal">
+      <span class="cf-file">CASE FILE 004</span>
+      <span class="cf-i">IV.</span>
+      <div class="cf-body">
+        <div class="cf-t">Multi-brand Design Transformations</div>
+        <div class="cf-d">Curated series across Amex, Changi Airport, HireWise, Dnata — the transformative power of considered, user-centred design at scale.</div>
+        <div class="cf-tags"><span class="cf-tag">Multi-brand</span><span class="cf-tag">Enterprise</span><span class="cf-tag">Systems</span></div>
+      </div>
+      <div class="cf-rt"><span class="cf-yr">2023</span><span class="cf-arr">↗</span></div>
+    </a>
+    <a href="https://medium.com/@dhairya.stv/revving-up-conversion-enhancing-the-online-to-offline-journey-for-cars24-car-buyers-acaf69851248" target="_blank" class="cf reveal d1">
+      <span class="cf-file">CASE FILE 005</span>
+      <span class="cf-i">V.</span>
+      <div class="cf-body">
+        <div class="cf-t">CARS24 — Online to Offline</div>
+        <div class="cf-d">Streamlining the O2O experience to enhance engagement, drive footfall to physical hubs, and increase car purchase conversions.</div>
+        <div class="cf-tags"><span class="cf-tag">O2O Experience</span><span class="cf-tag">Conversion</span><span class="cf-tag">Mobile</span></div>
+      </div>
+      <div class="cf-rt"><span class="cf-yr">2023</span><span class="cf-arr">↗</span></div>
+    </a>
+    <a href="https://medium.com/@dhairya.stv/revamping-watches-io-for-enhanced-user-experience-and-market-impact-2f0fb7d3037f" target="_blank" class="cf reveal d2">
+      <span class="cf-file">CASE FILE 006</span>
+      <span class="cf-i">VI.</span>
+      <div class="cf-body">
+        <div class="cf-t">Watches.io — Redefining Luxury Digital</div>
+        <div class="cf-d">Crafting a sophisticated digital environment for luxury watch enthusiasts, boosting platform confidence and conversions.</div>
+        <div class="cf-tags"><span class="cf-tag">Luxury</span><span class="cf-tag">E-commerce</span><span class="cf-tag">Visual Design</span></div>
+      </div>
+      <div class="cf-rt"><span class="cf-yr">2022</span><span class="cf-arr">↗</span></div>
+    </a>
+    <a href="https://medium.com/@dhairya.stv/enhancing-user-experience-for-material-depots-mobile-app-c2dabafd0dd6" target="_blank" class="cf reveal">
+      <span class="cf-file">CASE FILE 007</span>
+      <span class="cf-i">VII.</span>
+      <div class="cf-body">
+        <div class="cf-t">Material Depot — Mobile Marketplace</div>
+        <div class="cf-d">Personalised mobile marketplace streamlining material sourcing for interior designers, bridging online and offline experiences.</div>
+        <div class="cf-tags"><span class="cf-tag">Mobile App</span><span class="cf-tag">Marketplace</span><span class="cf-tag">0→1</span></div>
+      </div>
+      <div class="cf-rt"><span class="cf-yr">2022</span><span class="cf-arr">↗</span></div>
+    </a>
+  </div>
+</section>
+
+<!-- TICKET ROW -->
+<div class="ticket-row">
+  <div class="ticket reveal">
+    <div class="ticket-left">
+      <div class="ticket-top">
+        <span class="ticket-from">Speciality — A</span>
+        <span class="ticket-logo">D.S.</span>
+      </div>
+      <div class="ticket-main-title">0 → 1 Product Launches</div>
+      <div class="ticket-sub">From blank canvas to scalable, loved product.</div>
+      <div class="ticket-foot">
+        <div class="tf-block"><strong>6</strong>Years exp.</div>
+        <div class="tf-block"><strong>B2C</strong>Focus</div>
+      </div>
+    </div>
+    <div class="ticket-right">
+      <div class="ticket-barcode">
+        <div class="tbc-bar" style="width:2px"></div><div class="tbc-bar" style="width:1px"></div><div class="tbc-bar" style="width:3px"></div><div class="tbc-bar" style="width:1px"></div><div class="tbc-bar" style="width:2px"></div><div class="tbc-bar" style="width:3px"></div><div class="tbc-bar" style="width:1px"></div><div class="tbc-bar" style="width:2px"></div>
+      </div>
+      <span class="ticket-right-txt">UX Design</span>
+      <div class="ticket-num">001-25</div>
+    </div>
+  </div>
+  <div class="ticket reveal d1">
+    <div class="ticket-left">
+      <div class="ticket-top">
+        <span class="ticket-from">Speciality — B</span>
+        <span class="ticket-logo">D.S.</span>
+      </div>
+      <div class="ticket-main-title">Enterprise AI Experiences</div>
+      <div class="ticket-sub">Making powerful systems feel profoundly human.</div>
+      <div class="ticket-foot">
+        <div class="tf-block"><strong>40+</strong>Projects</div>
+        <div class="tf-block"><strong>B2B</strong>Focus</div>
+      </div>
+    </div>
+    <div class="ticket-right">
+      <div class="ticket-barcode">
+        <div class="tbc-bar" style="width:1px"></div><div class="tbc-bar" style="width:3px"></div><div class="tbc-bar" style="width:2px"></div><div class="tbc-bar" style="width:1px"></div><div class="tbc-bar" style="width:3px"></div><div class="tbc-bar" style="width:1px"></div><div class="tbc-bar" style="width:2px"></div><div class="tbc-bar" style="width:1px"></div>
+      </div>
+      <span class="ticket-right-txt">AI · UX</span>
+      <div class="ticket-num">002-25</div>
+    </div>
+  </div>
+  <div class="ticket reveal d2">
+    <div class="ticket-left">
+      <div class="ticket-top">
+        <span class="ticket-from">Speciality — C</span>
+        <span class="ticket-logo">D.S.</span>
+      </div>
+      <div class="ticket-main-title">Design Systems &amp; Workshops</div>
+      <div class="ticket-sub">Scalable systems and human-centred facilitation.</div>
+      <div class="ticket-foot">
+        <div class="tf-block"><strong>Global</strong>Clients</div>
+        <div class="tf-block"><strong>Figma</strong>Expert</div>
+      </div>
+    </div>
+    <div class="ticket-right">
+      <div class="ticket-barcode">
+        <div class="tbc-bar" style="width:3px"></div><div class="tbc-bar" style="width:1px"></div><div class="tbc-bar" style="width:2px"></div><div class="tbc-bar" style="width:3px"></div><div class="tbc-bar" style="width:1px"></div><div class="tbc-bar" style="width:2px"></div><div class="tbc-bar" style="width:1px"></div><div class="tbc-bar" style="width:3px"></div>
+      </div>
+      <span class="ticket-right-txt">Systems</span>
+      <div class="ticket-num">003-25</div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTES -->
+<section class="notes-section" id="notes">
+  <div class="notes-grid">
+    <div class="nl reveal">
+      <span class="nl-label">§ 004 · Notes from the Designer</span>
+      <h2 class="nl-headline">Where<br>purpose<br>meets <em>pixel.</em></h2>
+      <p class="nl-body">I love turning ideas into something real through design. I focus on interfaces that serve a real purpose — not just pretty, but actually solving problems. <strong>I'm a bit of a perfectionist about the small stuff,</strong> but that's precisely what makes good design great.</p>
+      <div class="nl-profile">
+        <div class="nlp-row"><span class="nlp-label">Location</span><span class="nlp-val">Mumbai, India</span></div>
+        <div class="nlp-row"><span class="nlp-label">Experience</span><span class="nlp-val">6 Years · Senior Level</span></div>
+        <div class="nlp-row"><span class="nlp-label">Focus</span><span class="nlp-val">Enterprise · AI · Product</span></div>
+        <div class="nlp-row"><span class="nlp-label">Available</span><span class="nlp-val">Open to opportunities</span></div>
+      </div>
+    </div>
+    <div class="nr reveal d1">
+      <div class="note-card">
+        <div class="nc-date">On exploration</div>
+        <div class="nc-title">Current obsessions</div>
+        <div class="nc-text">AI-native interaction patterns, voice UI, and the ethics of invisible design. How do we make <strong>powerful systems feel human</strong> when the system is opaque?</div>
+      </div>
+      <div class="note-card">
+        <div class="nc-date">On philosophy</div>
+        <div class="nc-title">Restraint as superpower</div>
+        <div class="nc-text">The gap between good and extraordinary lives in the 5% most people never consciously notice, but <strong>feel immediately.</strong> Restraint over decoration. Systems over surfaces. People before pixels.</div>
+      </div>
+      <div class="note-card">
+        <div class="nc-date">Currently reading</div>
+        <div class="nc-title">The shelf</div>
+        <div class="nc-text">
+          <div class="book-row"><em>The Design of Everyday Things</em> — Norman</div>
+          <div class="book-row"><em>Wabi-Sabi for Artists</em> — Leonard Koren</div>
+          <div class="book-row"><em>Thinking, Fast and Slow</em> — Kahneman</div>
+        </div>
+      </div>
+      <div class="note-card">
+        <div class="nc-date">Fascinated by</div>
+        <div class="nc-title">Archive culture. Japanese craft. <em style="font-style:italic;color:var(--blue-lt)">Muji's silence.</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FILM STRIP -->
+<div class="film-wrap" aria-hidden="true">
+  <div class="film-track" id="filmTrack">
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">001</span><span class="frame-title">Sephora</span><span class="frame-year">2024 · Beauty · UX</span></div><div class="frame-label">Sephora · 001</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">002</span><span class="frame-title">Emirates</span><span class="frame-year">2024 · Travel · Workshop</span></div><div class="frame-label">Emirates · 002</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">003</span><span class="frame-title">Carey Intl.</span><span class="frame-year">2023 · Mobility · B2B</span></div><div class="frame-label">Carey · 003</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">004</span><span class="frame-title">Multi-brand</span><span class="frame-year">2023 · Enterprise</span></div><div class="frame-label">Multi-brand · 004</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">005</span><span class="frame-title">CARS24</span><span class="frame-year">2023 · O2O · Mobile</span></div><div class="frame-label">CARS24 · 005</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">006</span><span class="frame-title">Watches.io</span><span class="frame-year">2022 · Luxury · E-com</span></div><div class="frame-label">Watches.io · 006</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">007</span><span class="frame-title">Material Depot</span><span class="frame-year">2022 · Marketplace</span></div><div class="frame-label">Material Depot · 007</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <!-- duplicates for seamless loop -->
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">001</span><span class="frame-title">Sephora</span><span class="frame-year">2024 · Beauty · UX</span></div><div class="frame-label">Sephora · 001</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">002</span><span class="frame-title">Emirates</span><span class="frame-year">2024 · Travel · Workshop</span></div><div class="frame-label">Emirates · 002</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">003</span><span class="frame-title">Carey Intl.</span><span class="frame-year">2023 · Mobility · B2B</span></div><div class="frame-label">Carey · 003</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">004</span><span class="frame-title">Multi-brand</span><span class="frame-year">2023 · Enterprise</span></div><div class="frame-label">Multi-brand · 004</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">005</span><span class="frame-title">CARS24</span><span class="frame-year">2023 · O2O · Mobile</span></div><div class="frame-label">CARS24 · 005</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">006</span><span class="frame-title">Watches.io</span><span class="frame-year">2022 · Luxury · E-com</span></div><div class="frame-label">Watches.io · 006</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+    <div class="frame"><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div><div class="frame-img"><span class="frame-num">007</span><span class="frame-title">Material Depot</span><span class="frame-year">2022 · Marketplace</span></div><div class="frame-label">Material Depot · 007</div><div class="perfs"><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div><div class="perf"></div></div></div>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<section class="process-wrap" id="process">
+  <div class="sec-head reveal">
+    <span class="sec-aside">Method<span>§ 005</span></span>
+    <h2 class="sec-h">How I Work</h2>
+    <span class="sec-count">3 steps</span>
+  </div>
+  <div class="process-grid">
+    <div class="p-step reveal">
+      <div class="p-num">— 01</div>
+      <div class="p-title">Understanding the Problem &amp; the People</div>
+      <div class="p-text">I begin by learning your goals and challenges — then uncover what users truly need beneath the surface. Research without empathy is just data collection.</div>
+    </div>
+    <div class="p-step reveal d1">
+      <div class="p-num">— 02</div>
+      <div class="p-title">Shaping Solutions With Purpose</div>
+      <div class="p-text">Brainstorm, sketch, and design interfaces that address real problems — every idea is both creative and practical. Aesthetic and function are never at odds.</div>
+    </div>
+    <div class="p-step reveal d2">
+      <div class="p-num">— 03</div>
+      <div class="p-title">Perfecting Every Detail</div>
+      <div class="p-text">Refine and polish every element until the product is seamless and impactful. The best design is the kind the user never has to think about.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <div class="reveal">
+      <span class="ct-label">§ 006 · Let's talk</span>
+      <h2 class="ct-h">Let's create<br>something <em>extraordinary</em><br>together.</h2>
+      <a href="mailto:dhairya.stv@gmail.com" class="ct-email">dhairya.stv@gmail.com</a>
+    </div>
+    <div class="ct-right reveal d1">
+      <a href="https://www.linkedin.com/in/dhairyastv/" target="_blank" class="ct-link">LinkedIn ↗</a>
+      <a href="https://www.instagram.com/dhairya__srivastava/" target="_blank" class="ct-link">Instagram ↗</a>
+      <a href="https://x.com/dhairya_stv" target="_blank" class="ct-link">X / Twitter ↗</a>
+      <a href="https://drive.google.com/file/d/1-WvdgOrHnpVmPa6uoqYHw4D8xCSVMUhx/view" target="_blank" class="ct-link">Résumé ↗</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="f-l">Dhairya Srivastava © 2025 — All rights reserved</span>
+  <span class="f-r">Designed with restraint.</span>
+</footer>
+
+<script>
+// ── Cursor with spring physics ──
+const cur = document.getElementById('cur');
+let mx=0,my=0,cx=0,cy=0,raf;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+(function loop(){cx+=(mx-cx)*.14;cy+=(my-cy)*.14;cur.style.left=cx+'px';cur.style.top=cy+'px';requestAnimationFrame(loop)})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('on-link'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('on-link'));
+});
+
+// ── Loader ──
+setTimeout(()=>{
+  const l=document.getElementById('loader');
+  l.classList.add('gone');
+  setTimeout(()=>l.style.display='none',600);
+},3200);
+
+// ── Nav on scroll ──
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('stuck',scrollY>50),{passive:true});
+
+// ── Scroll reveal ──
+const ro=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target)}});
+},{threshold:.07});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+// ── Parallax hero big number ──
+const bignum=document.querySelector('.hero-bignum');
+window.addEventListener('scroll',()=>{
+  if(bignum)bignum.style.transform=`translateY(${scrollY*.25}px)`;
+},{passive:true});
+</script>
+</body>
+</html>
