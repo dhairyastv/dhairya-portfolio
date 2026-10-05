@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inspection AI Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#e9eef5;
+  --card-top:#fbfcfe; --card-bot:#eef3fa;
+  --surface:#ffffff;
+  --line:#d5deea; --line-strong:#c1cfe3;
+  --text:#161616; --text-2:#525252; --text-3:#6f6f6f;
+  --blue:#0f62fe; --blue-soft:#edf4ff; --blue-line:#a6c8ff;
+  --red:#da1e28; --red-soft:#fff1f1; --red-line:#ffb3b8;
+  --orange:#eb6200; --orange-soft:#fff2e8; --orange-line:#ffc8a3;
+  --yellow:#b28600; --yellow-soft:#fcf4d6; --yellow-line:#f1d27a;
+  --green:#198038; --green-soft:#defbe6; --green-pill:#a7f0ba;
+  --purple:#8a3ffc; --purple-soft:#f6f2ff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#121619; --card-top:#1e2328; --card-bot:#181c20; --surface:#22272c;
+    --line:#343a40; --line-strong:#4d5358;
+    --text:#f4f4f4; --text-2:#c6c6c6; --text-3:#a8a8a8;
+    --blue:#78a9ff; --blue-soft:#162236; --blue-line:#2d4f8a;
+    --red:#ff8389; --red-soft:#2d1215; --red-line:#7a2128;
+    --orange:#ff9d57; --orange-soft:#2e1a0c; --orange-line:#7a3d0f;
+    --yellow:#f1c21b; --yellow-soft:#2b240c; --yellow-line:#6b5610;
+    --green:#42be65; --green-soft:#0f2a18; --green-pill:#0e6027;
+    --purple:#be95ff; --purple-soft:#211736;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#121619; --card-top:#1e2328; --card-bot:#181c20; --surface:#22272c;
+  --line:#343a40; --line-strong:#4d5358;
+  --text:#f4f4f4; --text-2:#c6c6c6; --text-3:#a8a8a8;
+  --blue:#78a9ff; --blue-soft:#162236; --blue-line:#2d4f8a;
+  --red:#ff8389; --red-soft:#2d1215; --red-line:#7a2128;
+  --orange:#ff9d57; --orange-soft:#2e1a0c; --orange-line:#7a3d0f;
+  --yellow:#f1c21b; --yellow-soft:#2b240c; --yellow-line:#6b5610;
+  --green:#42be65; --green-soft:#0f2a18; --green-pill:#0e6027;
+  --purple:#be95ff; --purple-soft:#211736;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--text);font:400 15px/1.5 "IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.mono{font-family:"IBM Plex Mono",monospace}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 64px}
+header.page h1{font-weight:500;font-size:26px;margin:0 0 4px}
+header.page p{margin:0;color:var(--text-2);max-width:760px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0 20px}
+.tab{appearance:none;border:1px solid var(--line-strong);background:var(--surface);color:var(--text);padding:10px 16px;font:500 14px "IBM Plex Sans",system-ui,sans-serif;cursor:pointer;border-radius:0}
+.tab[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+@media (max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}}
+.notes{background:var(--surface);border:1px solid var(--line);padding:20px;position:sticky;top:16px}
+.notes h3{margin:0 0 4px;font-size:16px;font-weight:600}
+.notes .tag{font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
+.notes ul{padding-left:18px;margin:8px 0 0}
+.notes li{margin:6px 0;color:var(--text-2);font-size:14px}
+.notes h4{font-size:13px;margin:16px 0 0;font-weight:600}
+.panel{display:none}.panel.active{display:block}
+
+/* ---- Card shell (shared design language) ---- */
+.card{border:1px solid var(--line-strong);background:linear-gradient(180deg,var(--card-top),var(--card-bot));}
+.card-head{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--line)}
+.card-head .title{font-size:22px;font-weight:400;flex:1;min-width:0}
+.ai-ico{width:34px;height:34px;flex:none;color:var(--text)}
+.icon-btn{background:none;border:0;padding:6px;color:var(--text);cursor:pointer;display:inline-flex}
+.icon-btn svg{width:22px;height:22px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 12px;font-size:14px;font-weight:500;white-space:nowrap}
+.pill.conf{background:var(--green-pill);color:var(--green)}
+:root[data-theme="dark"] .pill.conf{color:#defbe6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pill.conf{color:#defbe6}}
+.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:20px 24px 4px}
+.meta .k{color:var(--text-2);font-size:13px}
+.meta .v{font-size:16px}
+@media (max-width:640px){.meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sec{border-top:1px solid var(--line)}
+.sec-head{display:flex;align-items:center;padding:16px 24px;gap:12px}
+.sec-head .t{flex:1;font-size:17px}
+.sec-head .count{font-size:13px;color:var(--text-2)}
+.sec-body{padding:4px 24px 20px;border-top:1px solid var(--line)}
+.sec.collapsed .sec-body{display:none}
+.sec.collapsed .chev{transform:rotate(180deg)}
+.chev{transition:transform .15s}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:16px 0 8px}
+.stats>div{padding:0 16px;border-left:1px solid var(--line)}
+.stats>div:first-child{padding-left:0;border-left:0}
+.stats .k{color:var(--text-2);font-size:13px}
+.stats .v{font-size:20px;display:flex;align-items:center;gap:8px}
+.stats .v svg{width:18px;height:18px;flex:none}
+.stats .sub{font-size:12px;color:var(--text-3)}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:16px}.stats>div:nth-child(3){padding-left:0;border-left:0}}
+.bul{margin:10px 0 0;padding-left:20px}
+.bul li{margin:6px 0}
+.foot{display:flex;gap:28px;padding:18px 24px;border-top:1px solid var(--line);align-items:center}
+.foot .icon-btn svg{width:24px;height:24px}
+.foot .gen{margin-left:auto;font-size:12px;color:var(--text-3)}
+
+/* callouts */
+.callout{display:flex;gap:14px;border:1px solid var(--blue-line);border-left:4px solid var(--blue);background:var(--blue-soft);padding:16px 18px;margin:16px 24px}
+.callout svg{width:22px;height:22px;flex:none;color:var(--blue);margin-top:2px}
+.callout .k{font-size:13px;color:var(--text-2)}
+.callout .v{font-weight:600;font-size:16px}
+.callout.red{border-color:var(--red-line);border-left-color:var(--red);background:var(--red-soft)}
+.callout.red svg{color:var(--red)}
+.src{font-size:12px;color:var(--text-3);margin-top:6px}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:2px 8px;border:1px solid var(--line-strong);background:var(--surface);white-space:nowrap}
+.chip .dot{width:8px;height:8px;border-radius:50%}
+.st-red{color:var(--red);border-color:var(--red-line);background:var(--red-soft)}
+.st-orange{color:var(--orange);border-color:var(--orange-line);background:var(--orange-soft)}
+.st-yellow{color:var(--yellow);border-color:var(--yellow-line);background:var(--yellow-soft)}
+.st-green{color:var(--green);border-color:var(--green-pill);background:var(--green-soft)}
+.st-blue{color:var(--blue);border-color:var(--blue-line);background:var(--blue-soft)}
+.dot.red{background:var(--red)}.dot.orange{background:var(--orange)}.dot.yellow{background:var(--yellow)}.dot.green{background:var(--green)}
+.q{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--blue);background:var(--blue-soft);padding:1px 6px;text-decoration:none;border:1px solid var(--blue-line);white-space:nowrap}
+.q:hover{text-decoration:underline}
+.row-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* Option A: health table */
+.health{width:100%;border-collapse:collapse;margin-top:12px}
+.health td{padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.health tr:last-child td{border-bottom:0}
+.health td:first-child{padding-left:0;width:170px;font-weight:500}
+.health td:nth-child(2){width:170px}
+.health .why{color:var(--text-2);font-size:14px}
+@media (max-width:640px){.health td{display:block;width:auto!important;padding:4px 0;border:0}.health tr{display:block;padding:10px 0;border-bottom:1px solid var(--line)}}
+
+/* flow */
+.flow{display:grid;grid-template-columns:1fr 28px 1fr 28px 1fr;align-items:stretch;margin-top:16px}
+.flow .arrow{display:flex;align-items:center;justify-content:center;color:var(--text-3)}
+.flow .box{background:var(--surface);border:1px solid var(--line);padding:14px}
+.flow .box h5{margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2)}
+.flow .kv{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
+.flow .kv b{font-weight:600}
+.flow .kv.warn b{color:var(--red)}
+@media (max-width:760px){.flow{grid-template-columns:1fr}.flow .arrow{transform:rotate(90deg);height:28px}}
+.trace{margin-top:14px;display:grid;gap:10px}
+.trace-row{display:grid;grid-template-columns:200px 24px 1fr;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);padding:12px 14px}
+.trace-row .wo b{display:block}
+.trace-row .wo span{font-size:12px;color:var(--text-2)}
+.trace-row.gap{border-style:dashed;border-color:var(--orange-line);background:var(--orange-soft)}
+@media (max-width:640px){.trace-row{grid-template-columns:1fr}.trace-row>svg{display:none}}
+.ins{list-style:none;padding:0;margin:12px 0 0}
+.ins li{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ins li:last-child{border-bottom:0}
+.ins li svg{width:20px;height:20px;flex:none;color:var(--purple);margin-top:2px}
+.ins .why{display:block;color:var(--text-2);font-size:14px;margin-top:2px}
+.factors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;margin-top:12px}
+.factor{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.factor svg{width:18px;height:18px;flex:none;margin-top:2px}
+.factor .p{color:var(--green)}.factor .m{color:var(--orange)}
+@media (max-width:640px){.factors{grid-template-columns:1fr}}
+
+/* Option B: WO cards */
+.wo-list{display:grid;gap:12px;margin-top:14px}
+.wo-card{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--red);padding:14px 16px}
+.wo-card.p2{border-left-color:var(--orange)}
+.wo-card.sugg{border:1px dashed var(--line-strong);border-left:4px dashed var(--purple);background:transparent}
+.wo-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.wo-top .id{font-weight:600;font-size:16px}
+.wo-top .stat{margin-left:auto;font-size:13px;color:var(--text-2)}
+.wo-title{margin:6px 0 10px}
+.trig{font-size:13px;color:var(--text-2);border-top:1px solid var(--line);padding-top:10px}
+.trig div{display:flex;gap:8px;align-items:baseline;margin:4px 0}
+.btn{appearance:none;border:1px solid var(--blue);background:var(--blue);color:#fff;font:500 13px "IBM Plex Sans",system-ui,sans-serif;padding:6px 12px;cursor:pointer;border-radius:0}
+.btn.ghost{background:transparent;color:var(--blue)}
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}
+.tile{background:var(--surface);border:1px solid var(--line);padding:12px;border-top:3px solid var(--line-strong)}
+.tile.red{border-top-color:var(--red)}.tile.orange{border-top-color:var(--orange)}.tile.yellow{border-top-color:var(--yellow)}.tile.green{border-top-color:var(--green)}
+.tile .n{font-size:13px;color:var(--text-2)}
+.tile .s{font-weight:600;font-size:15px;margin:2px 0 6px}
+.tile .d{font-size:13px;color:var(--text-2);line-height:1.4}
+@media (max-width:860px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.status-chip{display:inline-flex;white-space:nowrap;align-items:center;gap:6px;padding:4px 12px;font-size:14px;font-weight:500;border-radius:999px;background:var(--orange-soft);color:var(--orange);border:1px solid var(--orange-line)}
+.conf-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 24px;border-top:1px solid var(--line);font-size:14px;color:var(--text-2)}
+.conf-row details{flex-basis:100%}
+.conf-row summary{cursor:pointer;color:var(--blue)}
+
+/* Option C */
+.verdict{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:24px;padding:20px 24px;align-items:center}
+@media (max-width:760px){.verdict{grid-template-columns:1fr}}
+.verdict .big{font-size:26px;font-weight:600;color:var(--red);line-height:1.2}
+.verdict .lead{color:var(--text-2);margin-top:6px}
+.funnel{display:grid;gap:6px}
+.fbar{display:grid;grid-template-columns:120px 1fr 44px;align-items:center;gap:10px;font-size:13px}
+.fbar .track{height:14px;background:var(--line)}
+.fbar .fill{height:100%;background:var(--blue)}
+.fbar .fill.red{background:var(--red)}.fbar .fill.purple{background:var(--purple)}
+.fbar .num{text-align:right;font-family:"IBM Plex Mono",monospace}
+.cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+@media (max-width:860px){.cards3{grid-template-columns:1fr}}
+.icard{background:var(--surface);border:1px solid var(--line);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.icard .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--purple);font-weight:600}
+.icard .h{font-weight:600}
+.icard .w{font-size:13px;color:var(--text-2)}
+.icard .w b{color:var(--text);font-weight:500}
+.wo-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+.wo-table th{text-align:left;font-weight:500;color:var(--text-2);font-size:12px;padding:8px;border-bottom:1px solid var(--line-strong)}
+.wo-table td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.wo-table tr.gap td{background:var(--orange-soft)}
+.wo-scroll{overflow-x:auto}
+.meter{display:flex;align-items:center;gap:16px;margin-top:12px}
+.meter .ring{width:72px;height:72px;flex:none}
+.bars{display:grid;gap:6px;flex:1;min-width:0}
+.bars .b{display:grid;grid-template-columns:150px 1fr 40px;gap:10px;align-items:center;font-size:13px}
+.bars .track{height:8px;background:var(--line)}
+.bars .fill{height:100%;background:var(--green)}
+.bars .fill.o{background:var(--orange)}
+@media (max-width:640px){.bars .b{grid-template-columns:110px 1fr 36px}.fbar{grid-template-columns:96px 1fr 36px}}
+.theme-toggle{float:right}
+.wo-card .row-chips .chip{white-space:normal}
+.wo-list>*{min-width:0}
+.stats.stats5{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:640px){
+  .stats.stats5{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stats.stats5>div{border-left:0;padding-left:0}
+  .card-head{flex-wrap:wrap;padding:14px 16px}
+  .card-head .title{font-size:19px;flex-basis:calc(100% - 60px)}
+  .meta,.sec-head,.sec-body,.foot,.verdict,.conf-row{padding-left:16px;padding-right:16px}
+  .callout{margin:16px}
+  .theme-toggle{float:none;margin-bottom:12px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-ai" viewBox="0 0 32 32"><path d="M4 4h18v2H6v20h10v2H4z" fill="currentColor"/><text x="7.5" y="18" font-family="IBM Plex Sans" font-weight="600" font-size="9" fill="currentColor">AI</text><path d="M25 18l1.6 3.4 3.6.4-2.7 2.5.8 3.6L25 26l-3.3 1.9.8-3.6-2.7-2.5 3.6-.4z" fill="currentColor"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h1.5M3 12h1.5M3 18h1.5" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 3h6v3H9zM8 10h8M8 13.5h8M8 17h5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 10v5M12 17.5v1.5" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 7v6M12 16v1.5" stroke="#fff" stroke-width="2"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-larrow" viewBox="0 0 24 24"><path d="M20 12H5M10 7l-5 5 5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2l2.2 6.3L20.5 10l-6.3 2.2L12 18.5l-2.2-6.3L3.5 10l6.3-1.7zM19 16l.9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9z" fill="currentColor"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 10v11H3V10zM7 10l4-7c1.7 0 2.5 1 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.3 7.5A2.5 2.5 0 0 1 17.2 21H7" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M17 14V3h4v11zM17 14l-4 7c-1.7 0-2.5-1-2.2-2.8L11.4 15H5a2 2 0 0 1-2-2.3L4.3 5.2A2.5 2.5 0 0 1 6.8 3H17" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><path d="M8 8h13v13H8z M4 16V3h13" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v5M12 15.5V17" stroke="currentColor" stroke-width="1.8"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="page">
+    <button class="tab theme-toggle" id="themeBtn" type="button">Toggle theme</button>
+    <h1>Inspection AI Summary: layout options</h1>
+    <p>Three directions built on the existing card (Plex type, collapsible sections, stat rows, blue callout, feedback footer). Each puts the decision first and links findings to work orders. Sample data, kept consistent across options.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-p="a">Option A · Attention first</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="b">Option B · Action-centric</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="c">Option C · Scorecard digest</button>
+  </div>
+
+  <!-- ============ OPTION A ============ -->
+  <section class="panel active" id="p-a">
+    <div class="layout">
+      <article class="card">
+        <div class="card-head">
+          <svg class="ai-ico"><use href="#i-ai"/></svg>
+          <div class="title">Inspection AI Summary</div>
+          <span class="pill conf">Confidence: High · 92%</span>
+          <button class="icon-btn" aria-label="Regenerate"><svg><use href="#i-refresh"/></svg></button>
+          <button class="icon-btn" aria-label="Collapse"><svg><use href="#i-chev"/></svg></button>
+        </div>
+
+        <div class="meta">
+          <div><div class="k">Asset</div><div class="v">TRK-0412 · Scania R450</div></div>
+          <div><div class="k">Location</div><div class="v">Fleet Workshop, Bay 2</div></div>
+          <div><div class="k">Inspector</div><div class="v">Mike Wilson</div></div>
+          <div><div class="k">Inspection conducted</div><div class="v">14:18 EST, 5 days ago</div></div>
+        </div>
+
+        <div class="callout red">
+          <svg><use href="#i-shield"/></svg>
+          <div>
+            <div class="k">Review Required · Safety</div>
+            <div class="v">Front near-side steering assembly is unsafe under load. Keep TRK-0412 out of service until WO-90412 is complete.</div>
+            <div class="row-chips">
+              <span class="chip st-red"><span class="dot red"></span>2 critical findings</span>
+              <span class="chip st-blue">2 work orders created</span>
+              <span class="chip st-orange"><span class="dot orange"></span>1 finding without action</span>
+            </div>
+            <div class="src">Based on <a class="q" href="#">Q1.02</a> <a class="q" href="#">Q1.03</a> <a class="q" href="#">Q2.03</a></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Asset Health</span><button class="icon-btn"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <table class="health">
+              <tr><td>Safety</td><td><span class="chip st-red"><span class="dot red"></span>Critical</span></td><td class="why">Stub axle moves radially under lateral load. Steering play at this level can lead to loss of control. <a class="q" href="#">Q1.02</a></td></tr>
+              <tr><td>Equipment Condition</td><td><span class="chip st-orange"><span class="dot orange"></span>Degradation Observed</span></td><td class="why">Kingpin bushing worn past 1.5&nbsp;mm and hub bearing rotationally defective. Both show progressive wear, not a one-off fault. <a class="q" href="#">Q1.03</a> <a class="q" href="#">Q2.03</a></td></tr>
+              <tr><td>Operational Readiness</td><td><span class="chip st-red"><span class="dot red"></span>Not Ready</span></td><td class="why">Depends on the P1 safety repair. Parts for WO-90412 arrive in 2 days.</td></tr>
+              <tr><td>Compliance</td><td><span class="chip st-green"><span class="dot green"></span>Healthy</span></td><td class="why">All 90 required questions answered. The 17 unanswered are optional cab and bodywork checks.</td></tr>
+              <tr><td>Documentation</td><td><span class="chip st-green"><span class="dot green"></span>Healthy</span></td><td class="why">All 3 failed checks have photos and inspector notes. 20 photos in total.</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Inspection → Findings → Actions</span><button class="icon-btn"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <div class="flow">
+              <div class="box"><h5>Inspection</h5>
+                <div class="kv"><span>Total questions</span><b>127</b></div>
+                <div class="kv"><span>Required</span><b>90 / 90</b></div>
+                <div class="kv"><span>Completed</span><b>110</b></div>
+                <div class="kv"><span>Incomplete (optional)</span><b>17</b></div>
+              </div>
+              <div class="arrow"><svg width="22" height="22"><use href="#i-arrow"/></svg></div>
+              <div class="box"><h5>Findings</h5>
+                <div class="kv warn"><span>Critical</span><b>2</b></div>
+                <div class="kv"><span>Failed checks</span><b>3</b></div>
+                <div class="kv"><span>Observations</span><b>2</b></div>
+                <div class="kv"><span>Exceptions</span><b>0</b></div>
+              </div>
+              <div class="arrow"><svg width="22" height="22"><use href="#i-arrow"/></svg></div>
+              <div class="box"><h5>Actions</h5>
+                <div class="kv"><span>Work orders</span><b>2</b></div>
+                <div class="kv"><span>P1 Safety</span><b>1</b></div>
+                <div class="kv"><span>P2 Repair</span><b>1</b></div>
+                <div class="kv warn"><span>Unactioned findings</span><b>1</b></div>
+              </div>
+            </div>
+            <div class="trace">
+              <div class="trace-row"><div class="wo"><b>WO-90412 · P1 Safety</b><span>Kingpin &amp; stub axle bushing kit (#189210)</span></div><svg width="20" height="20" style="color:var(--text-3)"><use href="#i-larrow"/></svg><div><a class="q" href="#">Q1.02</a> Radial movement under load &nbsp; <a class="q" href="#">Q1.03</a> Bushing &gt; 1.5&nbsp;mm</div></div>
+              <div class="trace-row"><div class="wo"><b>WO-90413 · P2 Repair</b><span>Front N/S hub bearing replacement</span></div><svg width="20" height="20" style="color:var(--text-3)"><use href="#i-larrow"/></svg><div><a class="q" href="#">Q2.03</a> Bearings rotationally defective &nbsp; <a class="q" href="#">Q3.07</a> Hub seal weep</div></div>
+              <div class="trace-row gap"><div class="wo"><b style="color:var(--orange)">No work order</b><span>Suggested: front wheel alignment check</span></div><svg width="20" height="20" style="color:var(--orange)"><use href="#i-larrow"/></svg><div><a class="q" href="#">Q4.01</a> Uneven inner-edge wear on N/S front tyre</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Key AI Insights</span><button class="icon-btn"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <ul class="ins">
+              <li><svg><use href="#i-spark"/></svg><div><b>All 3 failures sit in one subsystem: the front near-side steering and hub.</b><span class="why">Treat this as one failing assembly. Bushing play loads the bearing unevenly, so doing WO-90412 and WO-90413 in one visit saves a second teardown.</span></div></li>
+              <li><svg><use href="#i-spark"/></svg><div><b>WO-90413 is P2 but shares an assembly with a P1 safety repair.</b><span class="why">Consider raising its priority or bundling it, or the bearing may fail soon after the bushing repair.</span></div></li>
+              <li><svg><use href="#i-spark"/></svg><div><b>The tyre wear observation backs up the steering finding but has no action.</b><span class="why">Inner-edge wear is typical of kingpin play. Without an alignment check after the repair, the new tyre will wear the same way.</span></div></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Confidence</span><span class="count">High · 92%</span><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <div class="factors">
+              <div class="factor"><svg class="p"><use href="#i-check"/></svg><span>All 90 required questions answered</span></div>
+              <div class="factor"><svg class="p"><use href="#i-check"/></svg><span>Every failure has a photo and inspector note</span></div>
+              <div class="factor"><svg class="p"><use href="#i-check"/></svg><span>Findings agree with each other (one subsystem)</span></div>
+              <div class="factor"><svg class="m"><use href="#i-minus"/></svg><span>No earlier inspections of this asset to compare trends</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot">
+          <button class="icon-btn" aria-label="Helpful"><svg><use href="#i-up"/></svg></button>
+          <button class="icon-btn" aria-label="Not helpful"><svg><use href="#i-down"/></svg></button>
+          <button class="icon-btn" aria-label="Copy"><svg><use href="#i-copy"/></svg></button>
+          <span class="gen">AI-generated · check before acting</span>
+        </div>
+      </article>
+
+      <aside class="notes">
+        <div class="tag">Option A</div>
+        <h3>Attention first</h3>
+        <ul>
+          <li>Keeps the current card's order, but the generic recommendation becomes a <b>red status banner</b> with the go/no-go decision.</li>
+          <li>Follows your brief exactly: Health, then Inspection → Findings → Actions, then Insights, then Confidence.</li>
+          <li>The trace rows show which questions created each work order, and flag findings with <b>no work order</b>.</li>
+        </ul>
+        <h4>Best for</h4>
+        <ul><li>Supervisors reviewing the whole inspection. Easiest to move to from the current design.</li></ul>
+        <h4>Trade-off</h4>
+        <ul><li>Longest of the three. You scroll to reach the work orders.</li></ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ OPTION B ============ -->
+  <section class="panel" id="p-b">
+    <div class="layout">
+      <article class="card">
+        <div class="card-head">
+          <svg class="ai-ico"><use href="#i-ai"/></svg>
+          <div class="title">Inspection AI Summary</div>
+          <span class="status-chip"><svg width="14" height="14"><use href="#i-warn"/></svg>Follow-up Required</span>
+          <button class="icon-btn" aria-label="Regenerate"><svg><use href="#i-refresh"/></svg></button>
+          <button class="icon-btn" aria-label="Collapse"><svg><use href="#i-chev"/></svg></button>
+        </div>
+
+        <div class="meta">
+          <div><div class="k">Asset</div><div class="v">TRK-0412 · Scania R450</div></div>
+          <div><div class="k">Location</div><div class="v">Fleet Workshop, Bay 2</div></div>
+          <div><div class="k">Inspector</div><div class="v">Mike Wilson</div></div>
+          <div><div class="k">Inspection conducted</div><div class="v">14:18 EST, 5 days ago</div></div>
+        </div>
+
+        <div class="callout">
+          <svg><use href="#i-clip"/></svg>
+          <div>
+            <div class="k">Recommendation</div>
+            <div class="v">Keep out of service. Do both front near-side repairs in one visit and add a wheel alignment check before return to service.</div>
+            <div class="src">Based on <a class="q" href="#">Q1.02</a> <a class="q" href="#">Q1.03</a> <a class="q" href="#">Q2.03</a> <a class="q" href="#">Q4.01</a></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Work Orders</span><span class="count">2 created · 1 suggested</span><button class="icon-btn"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <div class="wo-list">
+              <div class="wo-card">
+                <div class="wo-top"><span class="id">WO-90412</span><span class="chip st-red">P1 · Safety</span><span class="stat">Awaiting parts · ETA 2 days</span></div>
+                <div class="wo-title">Kingpin &amp; stub axle bushing overhaul kit (Scania #189210)</div>
+                <div class="trig"><div><strong>Triggered by</strong></div>
+                  <div><a class="q" href="#">Q1.02</a><span>Critical: excessive radial movement during lateral load test</span></div>
+                  <div><a class="q" href="#">Q1.03</a><span>Critical: kingpin bushing worn beyond 1.5&nbsp;mm, audible clunk</span></div>
+                </div>
+              </div>
+              <div class="wo-card p2">
+                <div class="wo-top"><span class="id">WO-90413</span><span class="chip st-orange">P2 · Repair</span><span class="stat">Unscheduled</span></div>
+                <div class="wo-title">Front near-side hub bearing replacement</div>
+                <div class="trig"><div><strong>Triggered by</strong></div>
+                  <div><a class="q" href="#">Q2.03</a><span>Failed: bearings rotationally defective</span></div>
+                  <div><a class="q" href="#">Q3.07</a><span>Observation: hub seal weep</span></div>
+                </div>
+                <div class="row-chips"><span class="chip st-yellow">AI: same assembly as WO-90412. Bundle or raise to P1</span></div>
+              </div>
+              <div class="wo-card sugg">
+                <div class="wo-top"><span class="id" style="color:var(--purple)">Suggested by AI</span><span class="chip">No work order yet</span><span class="stat"><button class="btn">Create work order</button></span></div>
+                <div class="wo-title">Front wheel alignment check after steering repair</div>
+                <div class="trig"><div><a class="q" href="#">Q4.01</a><span>Observation: uneven inner-edge wear on N/S front tyre, consistent with kingpin play</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Asset Health</span><button class="icon-btn"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <div class="tiles">
+              <div class="tile red"><div class="n">Safety</div><div class="s" style="color:var(--red)">Critical</div><div class="d">Steering play under load</div></div>
+              <div class="tile orange"><div class="n">Condition</div><div class="s" style="color:var(--orange)">Degrading</div><div class="d">Bushing &amp; bearing wear</div></div>
+              <div class="tile red"><div class="n">Readiness</div><div class="s" style="color:var(--red)">Not ready</div><div class="d">Blocked by WO-90412</div></div>
+              <div class="tile green"><div class="n">Compliance</div><div class="s" style="color:var(--green)">Healthy</div><div class="d">90/90 required done</div></div>
+              <div class="tile green"><div class="n">Documentation</div><div class="s" style="color:var(--green)">Healthy</div><div class="d">Every failure has a photo</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Execution</span><button class="icon-btn"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <div class="stats">
+              <div><div class="k">Answered</div><div class="v"><svg><use href="#i-clip"/></svg>110/127</div><div class="sub">17 optional skipped</div></div>
+              <div><div class="k">Required</div><div class="v"><svg style="color:var(--green)"><use href="#i-check"/></svg>90/90</div><div class="sub">None skipped</div></div>
+              <div><div class="k">Failed</div><div class="v"><svg style="color:var(--red)"><use href="#i-x"/></svg>3</div><div class="sub">2 critical</div></div>
+              <div><div class="k">Observations</div><div class="v"><svg style="color:var(--yellow)"><use href="#i-minus"/></svg>2</div><div class="sub">1 without action</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Key AI Insights</span><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <ul class="bul">
+              <li><b>One subsystem, three symptoms.</b> All failures are in the front near-side steering and hub. Fixing only the bushing leaves a worn bearing in place.</li>
+              <li><b>Pattern across the fleet.</b> Two other R450s had kingpin bushing work orders in the last 6 months. The bushing inspection interval may be too long.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="conf-row">
+          <span class="pill conf">Confidence: High · 92%</span>
+          <span>Required answers complete, failures backed by photos, findings agree</span>
+          <details><summary>What lowers confidence?</summary><div style="margin-top:6px">No earlier inspections of this asset, so trends come from fleet data only.</div></details>
+        </div>
+
+        <div class="foot">
+          <button class="icon-btn"><svg><use href="#i-up"/></svg></button>
+          <button class="icon-btn"><svg><use href="#i-down"/></svg></button>
+          <button class="icon-btn"><svg><use href="#i-copy"/></svg></button>
+          <span class="gen">AI-generated · check before acting</span>
+        </div>
+      </article>
+
+      <aside class="notes">
+        <div class="tag">Option B</div>
+        <h3>Action-centric</h3>
+        <ul>
+          <li>Work orders come right after the recommendation. Each card shows its <b>status</b> and the <b>findings that triggered it</b>.</li>
+          <li>Findings with no work order appear as an <b>AI suggestion card</b> with a one-click Create button.</li>
+          <li>Health shrinks to 5 scannable tiles. Confidence moves to the bottom with the reasons behind it.</li>
+        </ul>
+        <h4>Best for</h4>
+        <ul><li>Maintenance planners and dispatchers whose job is the work orders.</li></ul>
+        <h4>Trade-off</h4>
+        <ul><li>Less room to explain each health theme. Relies on the tiles plus drill-down.</li></ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ OPTION C ============ -->
+  <section class="panel" id="p-c">
+    <div class="layout">
+      <article class="card">
+        <div class="card-head">
+          <svg class="ai-ico"><use href="#i-ai"/></svg>
+          <div class="title">Inspection AI Summary</div>
+          <span class="pill conf">Confidence: 92%</span>
+          <button class="icon-btn" aria-label="Regenerate"><svg><use href="#i-refresh"/></svg></button>
+          <button class="icon-btn" aria-label="Collapse"><svg><use href="#i-chev"/></svg></button>
+        </div>
+
+        <div class="verdict">
+          <div>
+            <div class="k" style="font-size:13px;color:var(--text-2)">TRK-0412 · Mike Wilson · 5 days ago</div>
+            <div class="big">Not ready to operate</div>
+            <div class="lead">Safety failure in the front near-side steering. 2 work orders open, 1 finding has no action.</div>
+          </div>
+          <div class="funnel" aria-label="Inspection to action funnel">
+            <div class="fbar"><span>Questions</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="num">127</span></div>
+            <div class="fbar"><span>Answered</span><div class="track"><div class="fill" style="width:86.6%"></div></div><span class="num">110</span></div>
+            <div class="fbar"><span>Failed / observed</span><div class="track"><div class="fill red" style="width:12%"></div></div><span class="num">5</span></div>
+            <div class="fbar"><span>Work orders</span><div class="track"><div class="fill purple" style="width:6%"></div></div><span class="num">2</span></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Asset Health</span><span class="count">2 of 5 themes need attention</span><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <div class="stats stats5">
+              <div><div class="k">Safety</div><div class="v" style="color:var(--red)"><svg><use href="#i-x"/></svg>Critical</div></div>
+              <div><div class="k">Condition</div><div class="v" style="color:var(--orange)"><svg><use href="#i-minus"/></svg>Wear</div></div>
+              <div><div class="k">Readiness</div><div class="v" style="color:var(--red)"><svg><use href="#i-x"/></svg>Blocked</div></div>
+              <div><div class="k">Compliance</div><div class="v" style="color:var(--green)"><svg><use href="#i-check"/></svg>OK</div></div>
+              <div><div class="k">Docs</div><div class="v" style="color:var(--green)"><svg><use href="#i-check"/></svg>OK</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">What AI Found</span><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <div class="cards3">
+              <div class="icard"><span class="lbl">Risk</span><span class="h">Steering play under load</span><span class="w"><b>Why it matters:</b> radial movement plus worn bushings can cause loss of steering control at speed.</span><div class="row-chips"><a class="q" href="#">Q1.02</a><a class="q" href="#">Q1.03</a></div></div>
+              <div class="icard"><span class="lbl">Pattern</span><span class="h">One subsystem, three symptoms</span><span class="w"><b>Why it matters:</b> bushing, bearing and tyre wear share a cause. Repair them together to avoid a second visit.</span><div class="row-chips"><a class="q" href="#">Q2.03</a><a class="q" href="#">Q4.01</a></div></div>
+              <div class="icard" style="border-color:var(--orange-line)"><span class="lbl" style="color:var(--orange)">Gap</span><span class="h">Tyre wear has no action</span><span class="w"><b>Why it matters:</b> without an alignment check, the new tyre will wear the same way.</span><div class="row-chips"><button class="btn ghost">Create work order</button></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="t">Triggered Work Orders</span><span class="count">2</span><button class="icon-btn"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <div class="wo-scroll">
+            <table class="wo-table">
+              <thead><tr><th>Work order</th><th>Priority</th><th>Triggered by</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><b>WO-90412</b><br><span style="color:var(--text-2);font-size:13px">Kingpin &amp; stub axle bushing kit</span></td><td><span class="chip st-red">P1 Safety</span></td><td><a class="q" href="#">Q1.02</a> <a class="q" href="#">Q1.03</a></td><td>Awaiting parts</td></tr>
+                <tr><td><b>WO-90413</b><br><span style="color:var(--text-2);font-size:13px">Front N/S hub bearing</span></td><td><span class="chip st-orange">P2 Repair</span></td><td><a class="q" href="#">Q2.03</a> <a class="q" href="#">Q3.07</a></td><td>Unscheduled</td></tr>
+                <tr class="gap"><td><b style="color:var(--orange)">No work order</b><br><span style="color:var(--text-2);font-size:13px">Alignment check (suggested)</span></td><td>—</td><td><a class="q" href="#">Q4.01</a></td><td>Needs action</td></tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec collapsed">
+          <div class="sec-head"><span class="t">Confidence breakdown</span><span class="count">92%</span><button class="icon-btn tog"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+          <div class="sec-body">
+            <div class="meter">
+              <svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--line)" stroke-width="3.2"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--green)" stroke-width="3.2" stroke-dasharray="92 100" transform="rotate(-90 18 18)" pathLength="100"/><text x="18" y="21" text-anchor="middle" font-size="9" font-weight="600" fill="var(--text)" font-family="IBM Plex Sans">92%</text></svg>
+              <div class="bars">
+                <div class="b"><span>Completeness</span><div class="track"><div class="fill" style="width:100%"></div></div><span>90/90</span></div>
+                <div class="b"><span>Evidence</span><div class="track"><div class="fill" style="width:100%"></div></div><span>3/3</span></div>
+                <div class="b"><span>Consistency</span><div class="track"><div class="fill" style="width:95%"></div></div><span>High</span></div>
+                <div class="b"><span>History</span><div class="track"><div class="fill o" style="width:30%"></div></div><span>Low</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot">
+          <button class="icon-btn"><svg><use href="#i-up"/></svg></button>
+          <button class="icon-btn"><svg><use href="#i-down"/></svg></button>
+          <button class="icon-btn"><svg><use href="#i-copy"/></svg></button>
+          <span class="gen">AI-generated · check before acting</span>
+        </div>
+      </article>
+
+      <aside class="notes">
+        <div class="tag">Option C</div>
+        <h3>Scorecard digest</h3>
+        <ul>
+          <li>A single <b>verdict</b> ("Not ready to operate") next to a funnel from questions to work orders.</li>
+          <li>Health becomes a one-line stat row in the same style as the existing Execution row.</li>
+          <li>Insights become 3 typed cards (<b>Risk · Pattern · Gap</b>), each with a "Why it matters" line.</li>
+          <li>Confidence is collapsed by default and splits into 4 measured factors.</li>
+        </ul>
+        <h4>Best for</h4>
+        <ul><li>Dashboards and lists with many inspections, or mobile, where the card is read in seconds.</li></ul>
+        <h4>Trade-off</h4>
+        <ul><li>Most compressed. Theme reasoning lives in drill-downs, not on the card.</li></ul>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<script>
+document.querySelectorAll('.tab[data-p]').forEach(function(t){
+  t.addEventListener('click',function(){
+    document.querySelectorAll('.tab[data-p]').forEach(function(x){x.setAttribute('aria-selected',x===t)});
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('active',p.id==='p-'+t.dataset.p)});
+  });
+});
+document.querySelectorAll('.tog').forEach(function(b){
+  b.addEventListener('click',function(){b.closest('.sec').classList.toggle('collapsed')});
+});
+document.getElementById('themeBtn').addEventListener('click',function(){
+  var r=document.documentElement, dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme=dark?'light':'dark';
+});
+</script>
+</body>
+</html>
