@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inspection AI Summary v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#e9eef5; --card-top:#fbfcfe; --card-bot:#eef3fa; --surface:#fff;
+  --line:#d5deea; --line-strong:#c1cfe3;
+  --text:#161616; --text-2:#525252; --text-3:#6f6f6f;
+  --blue:#0f62fe; --blue-2:#78a9ff; --blue-soft:#edf4ff; --blue-line:#a6c8ff;
+  --red:#da1e28; --red-soft:#fff1f1; --red-line:#ffb3b8;
+  --orange:#eb6200; --orange-soft:#fff2e8; --orange-line:#ffc8a3;
+  --yellow:#b28600; --yellow-soft:#fcf4d6; --yellow-line:#f1d27a;
+  --green:#198038; --green-soft:#defbe6; --green-pill:#a7f0ba; --green-ink:#0e6027;
+  --track:#dde3ec;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --page:#121619; --card-top:#1e2328; --card-bot:#181c20; --surface:#22272c;
+  --line:#343a40; --line-strong:#4d5358; --text:#f4f4f4; --text-2:#c6c6c6; --text-3:#a8a8a8;
+  --blue:#78a9ff; --blue-2:#3d70d6; --blue-soft:#162236; --blue-line:#2d4f8a;
+  --red:#ff8389; --red-soft:#2d1215; --red-line:#7a2128;
+  --orange:#ff9d57; --orange-soft:#2e1a0c; --orange-line:#7a3d0f;
+  --yellow:#f1c21b; --yellow-soft:#2b240c; --yellow-line:#6b5610;
+  --green:#42be65; --green-soft:#0f2a18; --green-pill:#0e6027; --green-ink:#defbe6; --track:#393f46;
+}}
+:root[data-theme="dark"]{
+  --page:#121619; --card-top:#1e2328; --card-bot:#181c20; --surface:#22272c;
+  --line:#343a40; --line-strong:#4d5358; --text:#f4f4f4; --text-2:#c6c6c6; --text-3:#a8a8a8;
+  --blue:#78a9ff; --blue-2:#3d70d6; --blue-soft:#162236; --blue-line:#2d4f8a;
+  --red:#ff8389; --red-soft:#2d1215; --red-line:#7a2128;
+  --orange:#ff9d57; --orange-soft:#2e1a0c; --orange-line:#7a3d0f;
+  --yellow:#f1c21b; --yellow-soft:#2b240c; --yellow-line:#6b5610;
+  --green:#42be65; --green-soft:#0f2a18; --green-pill:#0e6027; --green-ink:#defbe6; --track:#393f46;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--text);font:400 15px/1.5 "IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+a{color:var(--blue)}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 64px}
+.page-h{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:24px}
+.page-h h1{font-weight:500;font-size:26px;margin:0 0 4px}
+.page-h p{margin:0;color:var(--text-2);max-width:720px}
+.ghost-btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--text);padding:8px 14px;font-size:14px;cursor:pointer}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+@media (max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}}
+.notes{background:var(--surface);border:1px solid var(--line);padding:20px;position:sticky;top:16px;font-size:14px}
+.notes h3{margin:0 0 8px;font-size:16px;font-weight:600}
+.notes ol{padding-left:20px;margin:0}
+.notes li{margin:8px 0;color:var(--text-2)}
+.notes li b{color:var(--text);font-weight:600}
+
+/* card */
+.card{border:1px solid var(--line-strong);background:linear-gradient(180deg,var(--card-top),var(--card-bot))}
+.card-head{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--line);position:relative;flex-wrap:wrap}
+.card-head .title{font-size:22px;flex:1;min-width:180px}
+.ai-ico{width:34px;height:34px;flex:none}
+.icon-btn{background:none;border:0;padding:6px;color:var(--text);cursor:pointer;display:inline-flex}
+.icon-btn svg{width:22px;height:22px}
+.conf{position:relative}
+.conf summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:var(--green-pill);color:var(--green-ink);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:500;white-space:nowrap}
+.conf summary::-webkit-details-marker{display:none}
+.conf summary svg{width:14px;height:14px}
+.conf .pop{position:absolute;right:0;top:calc(100% + 8px);z-index:5;width:320px;max-width:calc(100vw - 48px);background:var(--surface);border:1px solid var(--line-strong);box-shadow:0 8px 24px rgba(0,0,0,.12);padding:14px 16px;font-size:13px}
+.pop h6{margin:0 0 8px;font-size:13px;font-weight:600}
+.pop .f{display:flex;gap:8px;align-items:flex-start;margin:6px 0;color:var(--text-2)}
+.pop .f svg{width:16px;height:16px;flex:none;margin-top:1px}
+.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:20px 24px 4px}
+.meta .k{color:var(--text-2);font-size:13px}
+.meta .v{font-size:16px}
+.callout{display:flex;gap:14px;border:1px solid var(--blue-line);border-left:4px solid var(--blue);background:var(--blue-soft);padding:16px 18px;margin:16px 24px}
+.callout>svg{width:22px;height:22px;flex:none;color:var(--blue);margin-top:2px}
+.callout .k{font-size:13px;color:var(--text-2)}
+.callout .v{font-weight:600;font-size:16px}
+.src{font-size:12px;color:var(--text-3);margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.q{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--blue);background:var(--blue-soft);padding:1px 6px;text-decoration:none;border:1px solid var(--blue-line);white-space:nowrap}
+.q:hover{text-decoration:underline}
+
+/* parameters */
+.params{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:0 24px 20px}
+.param{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--line-strong);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.param.red{border-top-color:var(--red)}.param.orange{border-top-color:var(--orange)}.param.green{border-top-color:var(--green)}
+.param .n{font-size:13px;color:var(--text-2)}
+.param .s{font-weight:600;font-size:17px;display:flex;align-items:center;gap:6px}
+.param .s svg{width:18px;height:18px}
+.param .d{font-size:13px;color:var(--text-2);line-height:1.4;margin-top:4px;flex:1}
+.param .src{margin-top:8px}
+.c-red{color:var(--red)}.c-orange{color:var(--orange)}.c-green{color:var(--green)}.c-yellow{color:var(--yellow)}
+
+/* sections */
+.sec{border-top:1px solid var(--line)}
+.sec-head{display:flex;align-items:center;padding:16px 24px;gap:12px}
+.sec-head .t{flex:1;font-size:17px}
+.sec-head .count{font-size:13px;color:var(--text-2)}
+.sec-body{padding:4px 24px 20px;border-top:1px solid var(--line)}
+.sec.collapsed .sec-body{display:none}
+.sec.collapsed .chev{transform:rotate(180deg)}
+.chev{transition:transform .15s}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:16px 0 4px}
+.stats>div{padding:0 16px;border-left:1px solid var(--line)}
+.stats>div:first-child{padding-left:0;border-left:0}
+.stats .k{color:var(--text-2);font-size:13px}
+.stats .v{font-size:20px;display:flex;align-items:center;gap:8px}
+.stats .v svg{width:18px;height:18px;flex:none}
+.stats .v a{font-size:16px}
+.stats .sub{font-size:12px;color:var(--text-3)}
+
+/* completion bar */
+.qbar{margin:18px 0 6px}
+.qbar .track{display:flex;height:12px;background:var(--track);overflow:hidden}
+.qbar .seg{height:100%}
+.qbar .req{background:var(--blue)}
+.qbar .opt{background:var(--blue-2)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--text-2);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;display:inline-block}
+.meta2{display:flex;gap:24px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-size:14px;color:var(--text-2)}
+.meta2 b{color:var(--text);font-weight:500}
+.meta2 svg{width:16px;height:16px;vertical-align:-3px;margin-right:4px}
+.wo-link{font-weight:500;text-decoration:none;border-bottom:1px solid var(--blue-line)}
+.wo-link:hover{border-bottom-color:var(--blue)}
+.bul{margin:14px 0 0;padding-left:20px}
+.bul li{margin:6px 0}
+
+/* findings */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
+.fchip{border:1px solid var(--line-strong);background:var(--surface);color:var(--text);padding:4px 12px;font-size:13px;cursor:pointer;border-radius:999px}
+.fchip[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:var(--surface)}
+.finding{display:grid;grid-template-columns:4px minmax(0,1fr);gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.finding:last-child{border-bottom:0}
+.finding .bar{background:var(--line-strong)}
+.finding.critical .bar{background:var(--red)}.finding.failed .bar{background:var(--orange)}.finding.obs .bar{background:var(--yellow)}
+.f-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sev{font-size:12px;font-weight:600;padding:1px 8px;border:1px solid}
+.sev.critical{color:var(--red);background:var(--red-soft);border-color:var(--red-line)}
+.sev.failed{color:var(--orange);background:var(--orange-soft);border-color:var(--orange-line)}
+.sev.obs{color:var(--yellow);background:var(--yellow-soft);border-color:var(--yellow-line)}
+.f-title{font-weight:600}
+.f-note{margin:6px 0 0;color:var(--text-2);font-size:14px;border-left:2px solid var(--line-strong);padding-left:10px;font-style:italic}
+.f-meta{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--text-2);align-items:center}
+.f-meta svg{width:15px;height:15px;vertical-align:-3px;margin-right:3px}
+.nowo{color:var(--orange);font-weight:500}
+.mini-btn{border:1px solid var(--blue);background:transparent;color:var(--blue);font-size:12px;padding:2px 10px;cursor:pointer}
+.foot{display:flex;gap:28px;padding:18px 24px;border-top:1px solid var(--line);align-items:center}
+.foot .icon-btn svg{width:24px;height:24px}
+.foot .gen{margin-left:auto;font-size:12px;color:var(--text-3)}
+
+/* alternatives */
+.alts{margin-top:40px}
+.alts h2{font-size:20px;font-weight:500;margin:0 0 4px}
+.alts>p{margin:0 0 16px;color:var(--text-2)}
+.alt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.alt-grid{grid-template-columns:minmax(0,1fr)}}
+.alt{background:var(--surface);border:1px solid var(--line);padding:16px 18px}
+.alt .lbl{font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
+.alt h4{margin:2px 0 12px;font-size:15px;font-weight:600}
+.alt .why{font-size:13px;color:var(--text-2);margin-top:12px}
+.prow{display:grid;grid-template-columns:110px 120px minmax(0,1fr);gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:baseline}
+.prow:last-child{border-bottom:0}
+.prow .s{font-weight:600}
+.prow .d{color:var(--text-2);font-size:13px}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.spill{display:inline-flex;align-items:center;gap:6px;border:1px solid;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:500}
+.spill.red{color:var(--red);background:var(--red-soft);border-color:var(--red-line)}
+.spill.orange{color:var(--orange);background:var(--orange-soft);border-color:var(--orange-line)}
+.spill.green{color:var(--green);background:var(--green-soft);border-color:var(--green-pill)}
+.spill .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.mbars{display:grid;gap:10px}
+.mb{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:13px}
+.mb .track{height:8px;background:var(--track)}
+.mb .fill{height:100%;background:var(--blue)}
+.mb .num{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:12px}
+.ring-row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.ring-row svg{width:96px;height:96px;flex:none}
+.ring-row .kv{font-size:13px;color:var(--text-2);display:grid;gap:4px}
+.ring-row .kv b{color:var(--text);font-weight:500}
+
+@media (max-width:640px){
+  .card-head{padding:14px 16px}
+  .card-head .title{font-size:19px}
+  .meta{grid-template-columns:repeat(2,minmax(0,1fr));padding-left:16px;padding-right:16px}
+  .callout{margin:16px}
+  .params{grid-template-columns:repeat(2,minmax(0,1fr));padding:0 16px 16px}
+  .sec-head,.sec-body,.foot{padding-left:16px;padding-right:16px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:16px}
+  .stats>div:nth-child(3){padding-left:0;border-left:0}
+  .prow{grid-template-columns:90px minmax(0,1fr)}.prow .d{grid-column:1/-1}
+  .mb{grid-template-columns:110px minmax(0,1fr) 56px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-ai" viewBox="0 0 32 32"><path d="M4 4h18v2H6v20h10v2H4z" fill="currentColor"/><text x="7.5" y="18" font-family="IBM Plex Sans, sans-serif" font-weight="600" font-size="9" fill="currentColor">AI</text><path d="M25 18l1.6 3.4 3.6.4-2.7 2.5.8 3.6L25 26l-3.3 1.9.8-3.6-2.7-2.5 3.6-.4z" fill="currentColor"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-cdown" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h1.5M3 12h1.5M3 18h1.5" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 3h6v3H9zM8 10h8M8 13.5h8M8 17h5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-attach" viewBox="0 0 24 24"><path d="M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.5 3.5a5 5 0 0 0-5.8 6.6L3 15.8 6.2 19l5.7-5.7a5 5 0 0 0 6.6-5.8l-3 3-2.8-.6-.6-2.8z" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 7v6M12 16v1.5" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 10v11H3V10zM7 10l4-7c1.7 0 2.5 1 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.3 7.5A2.5 2.5 0 0 1 17.2 21H7" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M17 14V3h4v11zM17 14l-4 7c-1.7 0-2.5-1-2.2-2.8L11.4 15H5a2 2 0 0 1-2-2.3L4.3 5.2A2.5 2.5 0 0 1 6.8 3H17" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><path d="M8 8h13v13H8z M4 16V3h13" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+</defs></svg>
+
+<div class="wrap">
+  <div class="page-h">
+    <div>
+      <h1>Inspection AI Summary: v2 structure</h1>
+      <p>Confidence in the header, then meta, recommendation, 4 status parameters, Overview and Defects &amp; Findings. Alternative treatments for the parameters and the Overview bar are below the card. Sample data.</p>
+    </div>
+    <button class="ghost-btn" id="themeBtn" type="button">Toggle theme</button>
+  </div>
+
+  <div class="layout">
+    <article class="card">
+      <!-- 6. Confidence on top -->
+      <div class="card-head">
+        <svg class="ai-ico"><use href="#i-ai"/></svg>
+        <div class="title">Inspection AI Summary</div>
+        <details class="conf">
+          <summary>Confidence: High · 92% <svg><use href="#i-cdown"/></svg></summary>
+          <div class="pop">
+            <h6>Why 92%</h6>
+            <div class="f"><svg class="c-green"><use href="#i-check"/></svg>All 90 required questions answered</div>
+            <div class="f"><svg class="c-green"><use href="#i-check"/></svg>Every failed check has photos and an inspector note</div>
+            <div class="f"><svg class="c-green"><use href="#i-check"/></svg>Findings agree with each other (one subsystem)</div>
+            <div class="f"><svg class="c-orange"><use href="#i-minus"/></svg>No earlier inspections of this asset to compare</div>
+          </div>
+        </details>
+        <button class="icon-btn" aria-label="Regenerate"><svg><use href="#i-refresh"/></svg></button>
+        <button class="icon-btn" aria-label="Collapse"><svg><use href="#i-chev"/></svg></button>
+      </div>
+
+      <!-- 1. Meta -->
+      <div class="meta">
+        <div><div class="k">Asset</div><div class="v">TRK-0412 · Scania R450</div></div>
+        <div><div class="k">Location</div><div class="v">Fleet Workshop, Bay 2</div></div>
+        <div><div class="k">Inspector</div><div class="v">Mike Wilson</div></div>
+        <div><div class="k">Inspection conducted</div><div class="v">14:18 EST, 5 days ago</div></div>
+      </div>
+
+      <!-- 2. Recommendation -->
+      <div class="callout">
+        <svg><use href="#i-clip"/></svg>
+        <div>
+          <div class="k">Recommendation</div>
+          <div class="v">Keep TRK-0412 out of service. Do the kingpin and hub bearing repairs in one visit, then check wheel alignment before return to service.</div>
+          <div class="src">Based on <a class="q" href="#q102">Q1.02</a><a class="q" href="#q103">Q1.03</a><a class="q" href="#q203">Q2.03</a><a class="q" href="#q401">Q4.01</a></div>
+        </div>
+      </div>
+
+      <!-- 3. Parameters -->
+      <div class="params">
+        <div class="param red">
+          <div class="n">Safety</div>
+          <div class="s c-red"><svg><use href="#i-x"/></svg>Critical</div>
+          <div class="d">Stub axle moves radially under lateral load. Risk of steering failure.</div>
+          <div class="src"><a class="q" href="#q102">Q1.02</a><a class="q" href="#q103">Q1.03</a></div>
+        </div>
+        <div class="param red">
+          <div class="n">Readiness</div>
+          <div class="s c-red"><svg><use href="#i-x"/></svg>Not ready</div>
+          <div class="d">Blocked until WO-90412 is done. Parts due in 2 days.</div>
+          <div class="src"><a class="q" href="#wo">WO-90412</a></div>
+        </div>
+        <div class="param orange">
+          <div class="n">Condition</div>
+          <div class="s c-orange"><svg><use href="#i-minus"/></svg>Degrading</div>
+          <div class="d">Bushing worn past 1.5&nbsp;mm and bearing defective. Progressive wear.</div>
+          <div class="src"><a class="q" href="#q103">Q1.03</a><a class="q" href="#q203">Q2.03</a></div>
+        </div>
+        <div class="param green">
+          <div class="n">Compliance</div>
+          <div class="s c-green"><svg><use href="#i-check"/></svg>Healthy</div>
+          <div class="d">All required checks answered. Skipped items are optional.</div>
+          <div class="src">90 / 90 required</div>
+        </div>
+      </div>
+
+      <!-- 4. Overview -->
+      <div class="sec" id="wo">
+        <div class="sec-head"><span class="t">Overview</span><button class="icon-btn" aria-label="Show questions"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog" aria-label="Toggle"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+        <div class="sec-body">
+          <div class="stats">
+            <div><div class="k">Total questions</div><div class="v"><svg><use href="#i-clip"/></svg>127</div></div>
+            <div><div class="k">Required</div><div class="v"><svg class="c-green"><use href="#i-check"/></svg>90 / 90</div><div class="sub">All answered</div></div>
+            <div><div class="k">Completed</div><div class="v"><svg><use href="#i-circle"/></svg>110</div><div class="sub">87% of total</div></div>
+            <div><div class="k">Incomplete (optional)</div><div class="v"><svg class="c-yellow"><use href="#i-minus"/></svg>17</div><div class="sub">No required items</div></div>
+          </div>
+          <div class="qbar" role="img" aria-label="127 questions: 90 required answered, 20 optional answered, 17 optional unanswered">
+            <div class="track"><div class="seg req" style="width:70.9%"></div><div class="seg opt" style="width:15.7%"></div></div>
+            <div class="legend"><span><i style="background:var(--blue)"></i>Required answered · 90</span><span><i style="background:var(--blue-2)"></i>Optional answered · 20</span><span><i style="background:var(--track)"></i>Optional unanswered · 17</span></div>
+          </div>
+          <div class="meta2">
+            <span><svg><use href="#i-clock"/></svg>Time spent <b>1.5 hrs</b></span>
+            <span><svg><use href="#i-attach"/></svg>Photos <b>20</b></span>
+            <span><svg><use href="#i-wrench"/></svg>Work orders created <b>2</b>: <a class="wo-link" href="#">WO-90412</a> · <a class="wo-link" href="#">WO-90413</a></span>
+          </div>
+          <ul class="bul">
+            <li><b>Critical risk:</b> wear and rotational defects on the front near-side axle and hub. The lateral load test showed excessive radial movement and an audible clunk.</li>
+            <li><b>Operational impact:</b> steering could fail under load. The truck can't run until the P1 repair is done.</li>
+            <li><b>Action summary:</b> 2 work orders created (<a class="wo-link" href="#">WO-90412</a> P1 safety, <a class="wo-link" href="#">WO-90413</a> P2 repair). 1 finding still has no work order.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 5. Defects & Findings -->
+      <div class="sec">
+        <div class="sec-head"><span class="t">Defects &amp; Findings</span><span class="count">5 findings · 1 without work order</span><button class="icon-btn" aria-label="Show list"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog" aria-label="Toggle"><svg class="chev"><use href="#i-chev"/></svg></button></div>
+        <div class="sec-body">
+          <div class="filters" role="group" aria-label="Filter findings">
+            <button class="fchip" aria-pressed="true" data-f="all">All · 5</button>
+            <button class="fchip" aria-pressed="false" data-f="critical">Critical · 2</button>
+            <button class="fchip" aria-pressed="false" data-f="failed">Failed · 1</button>
+            <button class="fchip" aria-pressed="false" data-f="obs">Observations · 2</button>
+          </div>
+          <div class="finding critical" id="q102" data-k="critical"><div class="bar"></div><div>
+            <div class="f-top"><span class="sev critical">Critical</span><a class="q" href="#">Q1.02</a><span class="f-title">Stub axle radial movement under lateral load</span></div>
+            <p class="f-note">"Excessive play on N/S stub axle during lateral load test."</p>
+            <div class="f-meta"><span><svg><use href="#i-attach"/></svg>4 photos</span><span><svg><use href="#i-wrench"/></svg><a class="wo-link" href="#">WO-90412</a> · P1 Safety</span></div>
+          </div></div>
+          <div class="finding critical" id="q103" data-k="critical"><div class="bar"></div><div>
+            <div class="f-top"><span class="sev critical">Critical</span><a class="q" href="#">Q1.03</a><span class="f-title">Kingpin bushing worn beyond tolerance</span></div>
+            <p class="f-note">"Noticeable clunk when loaded; kingpin bushing worn beyond 1.5mm tolerance."</p>
+            <div class="f-meta"><span><svg><use href="#i-attach"/></svg>3 photos</span><span><svg><use href="#i-wrench"/></svg><a class="wo-link" href="#">WO-90412</a> · P1 Safety</span></div>
+          </div></div>
+          <div class="finding failed" id="q203" data-k="failed"><div class="bar"></div><div>
+            <div class="f-top"><span class="sev failed">Failed</span><a class="q" href="#">Q2.03</a><span class="f-title">Hub N/S/F: bearings rotationally defective</span></div>
+            <div class="f-meta"><span><svg><use href="#i-attach"/></svg>3 photos</span><span>Failure code: Bearings Rotationally Defective</span><span><svg><use href="#i-wrench"/></svg><a class="wo-link" href="#">WO-90413</a> · P2 Repair</span></div>
+          </div></div>
+          <div class="finding obs" data-k="obs"><div class="bar"></div><div>
+            <div class="f-top"><span class="sev obs">Observation</span><a class="q" href="#">Q3.07</a><span class="f-title">Hub seal weep</span></div>
+            <div class="f-meta"><span><svg><use href="#i-attach"/></svg>2 photos</span><span><svg><use href="#i-wrench"/></svg><a class="wo-link" href="#">WO-90413</a> · included</span></div>
+          </div></div>
+          <div class="finding obs" id="q401" data-k="obs"><div class="bar"></div><div>
+            <div class="f-top"><span class="sev obs">Observation</span><a class="q" href="#">Q4.01</a><span class="f-title">Uneven inner-edge wear on N/S front tyre</span></div>
+            <p class="f-note">AI: this wear pattern is typical of kingpin play and supports Q1.03.</p>
+            <div class="f-meta"><span><svg><use href="#i-attach"/></svg>2 photos</span><span class="nowo">No work order</span><button class="mini-btn">Create work order</button></div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="foot">
+        <button class="icon-btn" aria-label="Helpful"><svg><use href="#i-up"/></svg></button>
+        <button class="icon-btn" aria-label="Not helpful"><svg><use href="#i-down"/></svg></button>
+        <button class="icon-btn" aria-label="Copy"><svg><use href="#i-copy"/></svg></button>
+        <span class="gen">AI-generated · check before acting</span>
+      </div>
+    </article>
+
+    <aside class="notes">
+      <h3>Content decisions</h3>
+      <ol>
+        <li><b>Confidence</b> sits in the header. Clicking it shows the reasons, so 92% is never an unexplained number.</li>
+        <li><b>Meta</b> stays as one plain row. It's for context only.</li>
+        <li><b>Recommendation</b> is a specific action plus a deadline, with the questions it's based on. If a recommendation can't cite a question, don't show it.</li>
+        <li><b>4 parameters</b>: Safety, Readiness, Condition, Compliance. Each has a status word, one line of reasoning and the questions behind it. Readiness cites a work order because the work order is what unblocks it.</li>
+        <li><b>Overview</b> uses your stat row. The 127-question bar shows completeness, and time, photos and linked work orders sit in one strip. The bullets stay short: risk, impact, action.</li>
+        <li><b>Defects &amp; Findings</b> lists every finding with its severity, question, inspector quote, photos and the work order it led to. A finding with <b>no work order</b> gets a Create button.</li>
+      </ol>
+    </aside>
+  </div>
+
+  <!-- Alternatives -->
+  <section class="alts">
+    <h2>Alternative treatments</h2>
+    <p>Other ways to show the parameter strip (step 3) and the Overview bar (step 4). Each can replace its part of the card above.</p>
+    <div class="alt-grid">
+      <div class="alt">
+        <div class="lbl">Parameters · B</div>
+        <h4>Compact rows</h4>
+        <div class="prow"><span>Safety</span><span class="s c-red">● Critical</span><span class="d">Radial movement under load · <a class="q" href="#">Q1.02</a></span></div>
+        <div class="prow"><span>Readiness</span><span class="s c-red">● Not ready</span><span class="d">Blocked by <a class="q" href="#">WO-90412</a></span></div>
+        <div class="prow"><span>Condition</span><span class="s c-orange">● Degrading</span><span class="d">Bushing &amp; bearing wear · <a class="q" href="#">Q1.03</a> <a class="q" href="#">Q2.03</a></span></div>
+        <div class="prow"><span>Compliance</span><span class="s c-green">● Healthy</span><span class="d">90 / 90 required answered</span></div>
+        <div class="why">Shortest of the three, with room for longer reasoning. Weaker at a glance than tiles.</div>
+      </div>
+      <div class="alt">
+        <div class="lbl">Parameters · C</div>
+        <h4>Status pills plus one AI line</h4>
+        <div class="pills">
+          <span class="spill red"><span class="dot"></span>Safety: Critical</span>
+          <span class="spill red"><span class="dot"></span>Readiness: Not ready</span>
+          <span class="spill orange"><span class="dot"></span>Condition: Degrading</span>
+          <span class="spill green"><span class="dot"></span>Compliance: Healthy</span>
+        </div>
+        <p style="margin:12px 0 0;font-size:14px;color:var(--text-2)">Front N/S steering wear (<a class="q" href="#">Q1.02</a> <a class="q" href="#">Q1.03</a>) blocks operation until <a class="q" href="#">WO-90412</a> is complete.</p>
+        <div class="why">Smallest footprint. Good for list views and mobile. Reasoning is shared by all four, not given per parameter.</div>
+      </div>
+      <div class="alt">
+        <div class="lbl">Overview bar · B</div>
+        <h4>One bar per metric</h4>
+        <div class="mbars">
+          <div class="mb"><span>Required</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="num">90/90</span></div>
+          <div class="mb"><span>All questions</span><div class="track"><div class="fill" style="width:86.6%"></div></div><span class="num">110/127</span></div>
+          <div class="mb"><span>Failures with evidence</span><div class="track"><div class="fill" style="width:100%;background:var(--green)"></div></div><span class="num">3/3</span></div>
+          <div class="mb"><span>Findings with a WO</span><div class="track"><div class="fill" style="width:80%;background:var(--orange)"></div></div><span class="num">4/5</span></div>
+        </div>
+        <div class="why">Adds evidence and action coverage, so a gap like "4 of 5 findings have a work order" is visible as a bar.</div>
+      </div>
+      <div class="alt">
+        <div class="lbl">Overview bar · C</div>
+        <h4>Completion ring</h4>
+        <div class="ring-row">
+          <svg viewBox="0 0 36 36" role="img" aria-label="110 of 127 answered"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--track)" stroke-width="3.4"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--blue)" stroke-width="3.4" pathLength="100" stroke-dasharray="70.9 100" transform="rotate(-90 18 18)"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--blue-2)" stroke-width="3.4" pathLength="100" stroke-dasharray="15.7 100" stroke-dashoffset="-70.9" transform="rotate(-90 18 18)"/><text x="18" y="20" text-anchor="middle" font-size="7" font-weight="600" fill="var(--text)" font-family="IBM Plex Sans, sans-serif">110/127</text></svg>
+          <div class="kv"><span>Required <b>90 / 90</b></span><span>Optional answered <b>20</b></span><span>Optional skipped <b>17</b></span><span>Time <b>1.5 hrs</b> · WOs <a class="wo-link" href="#">WO-90412</a> <a class="wo-link" href="#">WO-90413</a></span></div>
+        </div>
+        <div class="why">Compact and eye-catching, but harder to compare segments than a straight bar.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+document.querySelectorAll('.tog').forEach(function(b){b.addEventListener('click',function(){b.closest('.sec').classList.toggle('collapsed')})});
+document.querySelectorAll('.fchip').forEach(function(c){c.addEventListener('click',function(){
+  document.querySelectorAll('.fchip').forEach(function(x){x.setAttribute('aria-pressed',x===c)});
+  document.querySelectorAll('.finding').forEach(function(f){f.style.display=(c.dataset.f==='all'||f.dataset.k===c.dataset.f)?'':'none'});
+})});
+document.getElementById('themeBtn').addEventListener('click',function(){
+  var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme=dark?'light':'dark';
+});
+</script>
+</body>
+</html>
