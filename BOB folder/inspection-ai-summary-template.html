@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Summary Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#e9eef5; --card-top:#fbfcfe; --card-bot:#eef3fa; --surface:#fff;
+  --line:#d5deea; --line-strong:#c1cfe3;
+  --text:#161616; --text-2:#525252; --text-3:#6f6f6f;
+  --blue:#0f62fe; --blue-soft:#edf4ff; --blue-line:#a6c8ff;
+  --red:#da1e28; --red-soft:#fff1f1; --red-line:#ffb3b8;
+  --amber:#8e6a00; --amber-icon:#f1c21b; --amber-soft:#fcf4d6; --amber-line:#f1d27a;
+  --green:#198038; --green-soft:#defbe6; --green-pill:#a7f0ba; --green-ink:#0e6027;
+  --grey-soft:#f2f4f8; --purple:#8a3ffc; --purple-soft:#f6f2ff; --track:#dde3ec;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --page:#121619; --card-top:#1e2328; --card-bot:#181c20; --surface:#22272c;
+  --line:#343a40; --line-strong:#4d5358; --text:#f4f4f4; --text-2:#c6c6c6; --text-3:#a8a8a8;
+  --blue:#78a9ff; --blue-soft:#162236; --blue-line:#2d4f8a;
+  --red:#ff8389; --red-soft:#2d1215; --red-line:#7a2128;
+  --amber:#f1c21b; --amber-icon:#f1c21b; --amber-soft:#2b240c; --amber-line:#6b5610;
+  --green:#42be65; --green-soft:#0f2a18; --green-pill:#0e6027; --green-ink:#defbe6;
+  --grey-soft:#262b30; --purple:#be95ff; --purple-soft:#211736; --track:#393f46;
+}}
+:root[data-theme="dark"]{
+  --page:#121619; --card-top:#1e2328; --card-bot:#181c20; --surface:#22272c;
+  --line:#343a40; --line-strong:#4d5358; --text:#f4f4f4; --text-2:#c6c6c6; --text-3:#a8a8a8;
+  --blue:#78a9ff; --blue-soft:#162236; --blue-line:#2d4f8a;
+  --red:#ff8389; --red-soft:#2d1215; --red-line:#7a2128;
+  --amber:#f1c21b; --amber-icon:#f1c21b; --amber-soft:#2b240c; --amber-line:#6b5610;
+  --green:#42be65; --green-soft:#0f2a18; --green-pill:#0e6027; --green-ink:#defbe6;
+  --grey-soft:#262b30; --purple:#be95ff; --purple-soft:#211736; --track:#393f46;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--text);font:400 15px/1.5 "IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input{font-family:inherit}
+a{color:var(--blue)}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 64px}
+.page-h{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.page-h h1{font-weight:500;font-size:26px;margin:0 0 4px}
+.page-h p{margin:0;color:var(--text-2);max-width:760px}
+.ghost-btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--text);padding:8px 14px;font-size:14px;cursor:pointer}
+.controls{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:20px 0}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line-strong);background:var(--surface)}
+.seg button{border:0;border-right:1px solid var(--line);background:none;padding:9px 14px;font-size:14px;color:var(--text);cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;user-select:none}
+.toggle input{width:16px;height:16px;accent-color:var(--blue)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+@media (max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}}
+.notes{background:var(--surface);border:1px solid var(--line);padding:20px;position:sticky;top:16px;font-size:14px}
+.notes h3{margin:0 0 8px;font-size:16px;font-weight:600}
+.notes h4{font-size:13px;margin:16px 0 4px;font-weight:600}
+.notes ul{padding-left:18px;margin:4px 0 0}
+.notes li{margin:5px 0;color:var(--text-2)}
+.notes li b{color:var(--text);font-weight:600}
+.legend-src{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:6px}
+.legend-src span{display:inline-flex;align-items:center;gap:6px}
+.legend-src i{width:12px;height:12px;border:2px dashed}
+
+/* card */
+.card{border:1px solid var(--line-strong);background:linear-gradient(180deg,var(--card-top),var(--card-bot))}
+.card-head{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap;position:relative}
+.card-head .title{font-size:22px;flex:1;min-width:180px}
+.ai-ico{width:34px;height:34px;flex:none}
+.icon-btn{background:none;border:0;padding:6px;color:var(--text);cursor:pointer;display:inline-flex}
+.icon-btn svg{width:22px;height:22px}
+.conf{position:relative}
+.conf summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 12px;font-size:14px;font-weight:500;white-space:nowrap}
+.conf summary::-webkit-details-marker{display:none}
+.conf summary svg{width:14px;height:14px}
+.conf.high summary{background:var(--green-pill);color:var(--green-ink)}
+.conf.med summary{background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber-line)}
+.conf .pop{position:absolute;right:0;top:calc(100% + 8px);z-index:5;width:320px;max-width:calc(100vw - 48px);background:var(--surface);border:1px solid var(--line-strong);box-shadow:0 8px 24px rgba(0,0,0,.12);padding:14px 16px;font-size:13px}
+.pop h6{margin:0 0 8px;font-size:13px;font-weight:600}
+.pop .f{display:flex;gap:8px;align-items:flex-start;margin:6px 0;color:var(--text-2)}
+.pop .f svg{width:16px;height:16px;flex:none;margin-top:1px}
+.ctx{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:18px 24px 0;position:relative}
+.ctx .k{color:var(--text-2);font-size:13px}
+.ctx .v{font-size:16px}
+.ctx .v small{display:block;font-size:13px;color:var(--text-2)}
+.formname{padding:2px 24px 0;font-size:13px;color:var(--text-2);margin-top:10px;position:relative}
+.formname b{color:var(--text);font-weight:500}
+.q{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--blue);background:var(--blue-soft);padding:1px 6px;text-decoration:none;border:1px solid var(--blue-line);white-space:nowrap;font-weight:400}
+.wo{font-weight:500;text-decoration:none;border-bottom:1px solid var(--blue-line);white-space:nowrap}
+.c-red{color:var(--red)}.c-amber{color:var(--amber-icon)}.c-green{color:var(--green)}.c-grey{color:var(--text-3)}
+
+/* outcome */
+.outcome{margin:16px 24px 0;border:1px solid;border-left-width:6px;padding:16px 18px;display:flex;gap:14px;position:relative}
+.outcome>svg{width:26px;height:26px;flex:none;margin-top:2px}
+.outcome.action{border-color:var(--red-line);border-left-color:var(--red);background:var(--red-soft)}
+.outcome.action>svg,.outcome.action .eyebrow{color:var(--red)}
+.outcome.follow{border-color:var(--amber-line);border-left-color:var(--amber-icon);background:var(--amber-soft)}
+.outcome.follow>svg{color:var(--amber-icon)}.outcome.follow .eyebrow{color:var(--amber)}
+.outcome.clear{border-color:var(--green-pill);border-left-color:var(--green);background:var(--green-soft)}
+.outcome.clear>svg,.outcome.clear .eyebrow{color:var(--green)}
+.eyebrow{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.outcome .big{font-size:19px;font-weight:600;line-height:1.3;margin-top:2px}
+.rec{margin:12px 24px 0;display:flex;gap:14px;border:1px solid var(--blue-line);border-left:4px solid var(--blue);background:var(--blue-soft);padding:14px 18px;position:relative}
+.rec>svg{width:22px;height:22px;flex:none;color:var(--blue);margin-top:2px}
+.rec .k{font-size:13px;color:var(--text-2)}
+.rec .v{font-weight:600;font-size:16px}
+.src{font-size:12px;color:var(--text-3);margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* params */
+.params{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:16px 24px 20px;position:relative}
+.param{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--line-strong);padding:12px 14px;display:flex;flex-direction:column}
+.param.red{border-top-color:var(--red)}.param.amber{border-top-color:var(--amber-icon)}.param.green{border-top-color:var(--green)}.param.grey{border-top-color:var(--text-3)}
+.param .n{font-size:13px;color:var(--text-2)}
+.param .s{font-weight:600;font-size:16px;display:flex;align-items:center;gap:6px;margin:2px 0 6px}
+.param .s svg{width:18px;height:18px;flex:none}
+.param .d{font-size:13px;color:var(--text-2);line-height:1.4;flex:1}
+.param .src{margin-top:8px}
+
+/* sections */
+.sec{border-top:1px solid var(--line);position:relative}
+.sec-head{display:flex;align-items:center;padding:16px 24px;gap:12px}
+.sec-head .t{flex:1;font-size:17px}
+.sec-head .count{font-size:13px;color:var(--text-2)}
+.sec-body{padding:4px 24px 20px;border-top:1px solid var(--line)}
+.sec.collapsed .sec-body{display:none}
+.sec.collapsed .chev{transform:rotate(180deg)}
+.chev{transition:transform .15s}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:16px 0 4px}
+.stats>div{padding:0 16px;border-left:1px solid var(--line)}
+.stats>div:first-child{padding-left:0;border-left:0}
+.stats .k{color:var(--text-2);font-size:13px}
+.stats .v{font-size:20px;display:flex;align-items:center;gap:6px}
+.stats .v svg{width:18px;height:18px;flex:none}
+.stats .sub{font-size:12px;color:var(--text-3)}
+.qbar{margin:16px 0 4px}
+.qbar .track{display:flex;height:10px;background:var(--track);overflow:hidden}
+.qbar .req{background:var(--blue)}
+.qbar .opt{background:#78a9ff}
+.qbar .miss{background:var(--red)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-2);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;display:inline-block}
+.strip{display:flex;gap:22px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-size:14px;color:var(--text-2)}
+.strip b{color:var(--text);font-weight:500}
+.strip svg{width:16px;height:16px;vertical-align:-3px;margin-right:4px}
+
+/* findings */
+.sevrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0 8px}
+.sevbox{border:1px solid var(--line);background:var(--surface);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
+.sevbox b{font-size:18px;font-weight:600}
+.sevbox.critical{border-left:4px solid var(--red)}.sevbox.major{border-left:4px solid #ff832b}.sevbox.minor{border-left:4px solid var(--amber-icon)}.sevbox.obs{border-left:4px solid var(--text-3)}
+.sevbox.zero{opacity:.55}
+.finding{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.finding:last-child{border-bottom:0}
+.f-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.f-top b{font-weight:600}
+.sev{font-size:12px;font-weight:600;padding:1px 8px;border:1px solid;white-space:nowrap}
+.sev.critical{color:var(--red);background:var(--red-soft);border-color:var(--red-line)}
+.sev.major{color:#ba4e00;background:#fff2e8;border-color:#ffc8a3}
+.sev.minor{color:var(--amber);background:var(--amber-soft);border-color:var(--amber-line)}
+.sev.obs{color:var(--text-2);background:var(--grey-soft);border-color:var(--line-strong)}
+:root[data-theme="dark"] .sev.major{color:#ff9d57;background:#2e1a0c;border-color:#7a3d0f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sev.major{color:#ff9d57;background:#2e1a0c;border-color:#7a3d0f}}
+.f-detail{font-size:14px;color:var(--text-2);margin-top:4px}
+.f-ev{font-size:12px;color:var(--text-3);margin-top:4px}
+.f-ev svg{width:13px;height:13px;vertical-align:-2px;margin-right:2px}
+.f-act{text-align:right;font-size:13px;white-space:nowrap}
+.f-act .none{color:var(--red);font-weight:500}
+.f-act .fixed{color:var(--green);font-weight:500}
+.f-act small{display:block;color:var(--text-2)}
+.empty{display:flex;gap:10px;align-items:center;padding:14px;background:var(--green-soft);color:var(--green);margin-top:8px;font-weight:500}
+.empty svg{width:20px;height:20px}
+@media (max-width:640px){.finding{grid-template-columns:minmax(0,1fr)}.f-act{text-align:left}}
+
+/* review focus */
+.focus{list-style:none;margin:12px 0 0;padding:0;counter-reset:f}
+.focus li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;padding:8px 0;font-size:14px;counter-increment:f}
+.focus li::before{content:counter(f);width:22px;height:22px;border-radius:50%;background:var(--purple-soft);color:var(--purple);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.foot{display:flex;gap:28px;padding:18px 24px;border-top:1px solid var(--line);align-items:center}
+.foot .icon-btn svg{width:24px;height:24px}
+.foot .gen{margin-left:auto;font-size:12px;color:var(--text-3)}
+
+/* slot overlay */
+.slots [data-slot]{outline:2px dashed var(--blue);outline-offset:-2px}
+.slots [data-src="ai"]{outline-color:var(--purple)}
+.slots [data-src="sys"]{outline-color:var(--text-3)}
+.slots [data-slot]::after{content:attr(data-slot);position:absolute;top:0;right:0;z-index:4;font:500 11px/1 "IBM Plex Mono",monospace;padding:4px 6px;background:var(--blue);color:#fff;pointer-events:none}
+.slots [data-src="ai"]::after{background:var(--purple)}
+.slots [data-src="sys"]::after{background:var(--text-3)}
+
+/* spec */
+.spec{margin-top:40px}
+.spec h2{font-size:20px;font-weight:500;margin:0 0 4px}
+.spec>p{margin:0 0 14px;color:var(--text-2)}
+.tscroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line)}
+table.st{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
+.st th{text-align:left;font-weight:600;font-size:12px;color:var(--text-2);padding:10px 12px;border-bottom:1px solid var(--line-strong);background:var(--grey-soft)}
+.st td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.st td:first-child{font-weight:600;white-space:nowrap}
+.srcchip{font-size:11px;font-weight:600;padding:1px 6px;white-space:nowrap}
+.srcchip.form{background:var(--blue-soft);color:var(--blue)}
+.srcchip.ai{background:var(--purple-soft);color:var(--purple)}
+.srcchip.sys{background:var(--grey-soft);color:var(--text-2)}
+.scales{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+@media (max-width:860px){.scales{grid-template-columns:minmax(0,1fr)}}
+.scale{background:var(--surface);border:1px solid var(--line);padding:14px 16px;font-size:14px}
+.scale h4{margin:0 0 8px;font-size:14px;font-weight:600}
+.scale .r{display:flex;gap:8px;align-items:baseline;padding:4px 0}
+.scale .r .sw{width:10px;height:10px;flex:none;border-radius:2px;transform:translateY(1px)}
+.scale .r span{color:var(--text-2)}
+
+@media (max-width:760px){
+  .params{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sevrow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px}
+  .stats>div:nth-child(3){padding-left:0;border-left:0}
+}
+@media (max-width:640px){
+  .card-head{padding:14px 16px}.card-head .title{font-size:19px}
+  .ctx{grid-template-columns:repeat(2,minmax(0,1fr));padding-left:16px;padding-right:16px}
+  .formname{padding-left:16px;padding-right:16px}
+  .outcome,.rec{margin-left:16px;margin-right:16px}
+  .params{padding-left:16px;padding-right:16px}
+  .sec-head,.sec-body,.foot{padding-left:16px;padding-right:16px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-ai" viewBox="0 0 32 32"><path d="M4 4h18v2H6v20h10v2H4z" fill="currentColor"/><text x="7.5" y="18" font-family="IBM Plex Sans, sans-serif" font-weight="600" font-size="9" fill="currentColor">AI</text><path d="M25 18l1.6 3.4 3.6.4-2.7 2.5.8 3.6L25 26l-3.3 1.9.8-3.6-2.7-2.5 3.6-.4z" fill="currentColor"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-cdown" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h1.5M3 12h1.5M3 18h1.5" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 3h6v3H9zM8 10h8M8 13.5h8M8 17h5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-attach" viewBox="0 0 24 24"><path d="M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.5 3.5a5 5 0 0 0-5.8 6.6L3 15.8 6.2 19l5.7-5.7a5 5 0 0 0 6.6-5.8l-3 3-2.8-.6-.6-2.8z" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-err" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 6.5v7M12 16v1.8" stroke="#fff" stroke-width="2.2"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 2.5l10.5 19h-21z" fill="currentColor"/><path d="M12 9v6M12 17v1.8" stroke="#161616" stroke-width="2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="i-dash" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 10v11H3V10zM7 10l4-7c1.7 0 2.5 1 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.3 7.5A2.5 2.5 0 0 1 17.2 21H7" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M17 14V3h4v11zM17 14l-4 7c-1.7 0-2.5-1-2.2-2.8L11.4 15H5a2 2 0 0 1-2-2.3L4.3 5.2A2.5 2.5 0 0 1 6.8 3H17" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><path d="M8 8h13v13H8z M4 16V3h13" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+</defs></svg>
+
+<div class="wrap">
+  <div class="page-h">
+    <div>
+      <h1>AI Summary Card: universal template</h1>
+      <p>One fixed layout for any industry. Switch the industry to see the same slots filled with different inspections, and turn on the slot overlay to see where each piece of content comes from. Sample data.</p>
+    </div>
+    <button class="ghost-btn" id="themeBtn" type="button">Toggle theme</button>
+  </div>
+
+  <div class="controls">
+    <div class="seg" id="industry" role="group" aria-label="Sample industry"></div>
+    <label class="toggle"><input type="checkbox" id="slotToggle"> Show template slots</label>
+  </div>
+
+  <div class="layout">
+    <article class="card" id="card"></article>
+
+    <aside class="notes">
+      <h3>How the template works</h3>
+      <h4>Fixed for every organization</h4>
+      <ul>
+        <li><b>Section order</b>: context, outcome, recommendation, 4 assessment areas, overview, findings, review focus.</li>
+        <li><b>The 4 assessment areas</b>: Safety, Condition, Compliance, Readiness.</li>
+        <li><b>Status scales</b>: 3 outcomes, 4 severity levels, 4 colours.</li>
+        <li><b>Finding layout</b>: severity, question, what was found, evidence, action.</li>
+      </ul>
+      <h4>Configurable per organization</h4>
+      <ul>
+        <li>Labels only: "Readiness" can read "Operability" (nuclear) or "Airworthiness" (aviation). "Critical" can read "Level 1".</li>
+        <li>Work order prefix and link target.</li>
+      </ul>
+      <h4>Filled per inspection</h4>
+      <ul><li>Everything else: form data and AI-written text.</li></ul>
+      <h4>Slot overlay key</h4>
+      <div class="legend-src">
+        <span><i style="border-color:var(--blue)"></i>Form data</span>
+        <span><i style="border-color:var(--purple)"></i>AI-written</span>
+        <span><i style="border-color:var(--text-3)"></i>System</span>
+      </div>
+    </aside>
+  </div>
+
+  <section class="spec">
+    <h2>Slot spec</h2>
+    <p>What goes in each slot, where it comes from, and what to show when there's nothing to say.</p>
+    <div class="tscroll">
+      <table class="st">
+        <thead><tr><th>Slot</th><th>Source</th><th>Content rule</th><th>When empty or uncertain</th></tr></thead>
+        <tbody>
+          <tr><td>1 · Confidence</td><td><span class="srcchip ai">AI</span></td><td>Level (High ≥ 85, Medium 60–84, Low &lt; 60) with %. Click shows 2–4 reasons: completeness, evidence, consistency, history.</td><td>Low: amber pill and the outcome says "Review carefully".</td></tr>
+          <tr><td>2 · Context</td><td><span class="srcchip form">Form</span></td><td>Asset ID + name, location, performed by, completed date and time, form name.</td><td>Show "Not recorded". Never leave a blank.</td></tr>
+          <tr><td>3 · Outcome</td><td><span class="srcchip ai">AI</span></td><td>One of: <b>Action required</b> · <b>Follow-up required</b> · <b>No issues found</b>. Plus one sentence on the asset's condition now.</td><td>Required questions unanswered: outcome can't be "No issues found".</td></tr>
+          <tr><td>4 · Recommendation</td><td><span class="srcchip ai">AI</span></td><td>The next step: what, by when, and which work order. Must cite the questions it's based on.</td><td>No findings: "No action needed" + next due date. No citation possible: hide it.</td></tr>
+          <tr><td>5 · Assessment</td><td><span class="srcchip ai">AI</span></td><td>Safety, Condition, Compliance, Readiness. Each: status word, colour from the 4-level scale, one line of reasoning, cited questions.</td><td>Form has no related questions: grey "Not assessed".</td></tr>
+          <tr><td>6 · Overview</td><td><span class="srcchip form">Form</span></td><td>Total questions, required answered / total, optional answered / total, unanswered, time spent, attachments, work orders created (links).</td><td>Always shown. Unanswered required questions show in red.</td></tr>
+          <tr><td>7 · Findings summary</td><td><span class="srcchip form">Form</span> <span class="srcchip ai">AI</span></td><td>Count per severity: Critical, Major, Minor, Observation. Severity comes from the form's failure codes when present, otherwise the AI classifies it.</td><td>Zero counts shown faded, not hidden.</td></tr>
+          <tr><td>8 · Finding item</td><td><span class="srcchip form">Form</span> <span class="srcchip ai">AI</span></td><td>Severity · question ID · short title · measured value vs limit, or the inspector note · evidence count · action (work order, fixed on site, or <b>no action</b>).</td><td>No findings: green "All checks passed" line.</td></tr>
+          <tr><td>9 · Review focus</td><td><span class="srcchip ai">AI</span></td><td>1–3 things the reviewer should check before approving: missing evidence, readings near a limit, findings without action, skipped checks.</td><td>Always at least one item, even on a clean inspection.</td></tr>
+          <tr><td>10 · Feedback</td><td><span class="srcchip sys">System</span></td><td>Helpful / not helpful, copy, regenerate, "AI-generated" label.</td><td>Always shown.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scales">
+      <div class="scale"><h4>Outcome (slot 3)</h4>
+        <div class="r"><i class="sw" style="background:var(--red)"></i><div><b>Action required</b><br><span>Asset unsafe or unusable until fixed</span></div></div>
+        <div class="r"><i class="sw" style="background:var(--amber-icon)"></i><div><b>Follow-up required</b><br><span>Usable, but something needs scheduling or checking</span></div></div>
+        <div class="r"><i class="sw" style="background:var(--green)"></i><div><b>No issues found</b><br><span>All checks passed, nothing to do</span></div></div>
+      </div>
+      <div class="scale"><h4>Assessment status (slot 5)</h4>
+        <div class="r"><i class="sw" style="background:var(--red)"></i><div><b>Critical</b> <span>· blocks use</span></div></div>
+        <div class="r"><i class="sw" style="background:var(--amber-icon)"></i><div><b>Needs attention</b> <span>· usable, act soon</span></div></div>
+        <div class="r"><i class="sw" style="background:var(--green)"></i><div><b>Healthy</b> <span>· no concerns</span></div></div>
+        <div class="r"><i class="sw" style="background:var(--text-3)"></i><div><b>Not assessed</b> <span>· no related questions</span></div></div>
+      </div>
+      <div class="scale"><h4>Finding severity (slots 7–8)</h4>
+        <div class="r"><i class="sw" style="background:var(--red)"></i><div><b>Critical</b> <span>· safety risk or stops operation</span></div></div>
+        <div class="r"><i class="sw" style="background:#ff832b"></i><div><b>Major</b> <span>· must be repaired</span></div></div>
+        <div class="r"><i class="sw" style="background:var(--amber-icon)"></i><div><b>Minor</b> <span>· fix when convenient</span></div></div>
+        <div class="r"><i class="sw" style="background:var(--text-3)"></i><div><b>Observation</b> <span>· not a failure, worth noting</span></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+var SAMPLES = [
+ {key:'transport', label:'Transportation', form:'Front Axle & Steering Inspection',
+  asset:['TRK-0412','Scania R450 truck'], loc:'Fleet Workshop, Bay 2', by:['Mike Wilson','Technician'], when:['Oct 1, 2026','14:18 EST'],
+  conf:{pct:92, reasons:[[1,'All required questions answered'],[1,'Every failed check has photos'],[0,'No earlier inspections of this asset to compare']]},
+  outcome:['action','Action required','Front steering assembly failed safety checks. The truck should stay out of service.'],
+  rec:['Keep TRK-0412 out of service. Do WO-1006 and WO-1007 in one visit, then check wheel alignment.',['Q1.02','Q1.03','Q2.03','Q4.01']],
+  params:[['Safety','red','Critical','Radial play at the stub axle under lateral load.',['Q1.02']],
+          ['Condition','amber','Needs attention','Bushing past 1.5 mm limit. Hub bearing defective.',['Q1.03','Q2.03']],
+          ['Compliance','green','Healthy','All 90 required checks answered with evidence.',[]],
+          ['Readiness','red','Not ready','Blocked until WO-1006 is complete.',[]]],
+  ov:{total:127,req:90,reqDone:90,opt:37,optDone:25,time:'1.5 hrs',att:20,wos:['WO-1006','WO-1007']},
+  findings:[['critical','Q1.02','Stub axle radial movement','Exceeded play limit in lateral load test',4,['wo','WO-1006','P1 Safety']],
+            ['critical','Q1.03','Kingpin bushing worn','Measured beyond 1.5 mm limit · "Noticeable clunk when loaded"',3,['wo','WO-1006','P1 Safety']],
+            ['major','Q2.03','Hub bearing defective','Failure code: Bearings Rotationally Defective',3,['wo','WO-1007','P2 Repair']],
+            ['obs','Q4.01','Uneven tyre wear, front left','Likely caused by the kingpin play in Q1.03',2,['none']]],
+  focus:['Q1.03 has no exact measurement recorded. Ask the technician for the value.','Q4.01 (tyre wear) has no work order. Decide whether to add an alignment check.','WO-1007 is P2 but shares an assembly with P1 WO-1006. Consider bundling them.']},
+ {key:'nuclear', label:'Nuclear', form:'Quarterly Pump Surveillance Test',
+  asset:['RHR-P-2A','Residual heat removal pump 2A'], loc:'Unit 2 Auxiliary Building, El. 245 ft', by:['Priya Nair','Technician'], when:['Sep 29, 2026','09:40 EST'],
+  conf:{pct:88, reasons:[[1,'All 64 required steps signed'],[1,'Readings recorded against their limits'],[0,'Only 1 earlier test to compare the trend with']]},
+  outcome:['follow','Follow-up required','Pump passed its operability test, but bearing vibration is above the alert level.'],
+  rec:['Increase vibration monitoring to weekly and complete the analysis in WO-55120 before the next quarterly test.',['Q3.04','Q3.05']],
+  params:[['Safety','amber','Needs attention','Within operability limits. Vibration trending up.',['Q3.04']],
+          ['Condition','amber','Needs attention','Outboard bearing 0.42 in/s, above the 0.325 alert level.',['Q3.04']],
+          ['Compliance','green','Healthy','Test completed within its window. All required steps signed.',[]],
+          ['Readiness','green','Operable','Flow and pressure met acceptance criteria.',['Q2.01','Q2.02']]],
+  ov:{total:72,req:64,reqDone:64,opt:8,optDone:6,time:'3.2 hrs',att:14,wos:['WO-55120']},
+  findings:[['major','Q3.04','Outboard bearing vibration above alert level','0.42 in/s measured · alert 0.325 · action 0.70',3,['wo','WO-55120','Vibration analysis']],
+            ['minor','Q4.02','Lube oil level low','Topped up during the test',1,['fixed']],
+            ['obs','Q4.06','Mechanical seal weep','2 drops/min · limit 10 drops/min',2,['none']]],
+  focus:['Compare Q3.04 with earlier quarterly readings to confirm the trend.','Check that the oil top-up in Q4.02 was logged with the oil type used.','Seal weep (Q4.06) is within limits. No action unless it rises.']},
+ {key:'solar', label:'Solar', form:'Inverter Semi-annual Maintenance',
+  asset:['INV-07','Central inverter, 2.5 MW'], loc:'Block C, Sunfield Solar Farm', by:['Carlos Mendez','Technician'], when:['Oct 3, 2026','11:05 MST'],
+  conf:{pct:78, reasons:[[1,'Thermal images attached for the hotspot'],[1,'Findings agree with each other'],[0,'2 required checks were not done']]},
+  outcome:['action','Action required','The inverter is running but derated. A combiner box hotspot is a fire risk.'],
+  rec:['Isolate combiner box CB-07-3 and replace the fuse holder (WO-3301) within 48 hours. Then clean and re-test string 12.',['Q2.07','Q5.03']],
+  params:[['Safety','red','Critical','Terminal hotspot at 78 °C on combiner box CB-07-3. Fire risk.',['Q2.07']],
+          ['Condition','amber','Needs attention','String 12 output 18% below its neighbours.',['Q5.03']],
+          ['Compliance','amber','Needs attention','2 of 48 required checks skipped because of rain.',['Q6.01','Q6.02']],
+          ['Readiness','amber','Limited','Running at 92% capacity until repaired.',[]]],
+  ov:{total:60,req:48,reqDone:46,opt:12,optDone:9,time:'2.4 hrs',att:26,wos:['WO-3301','WO-3302']},
+  findings:[['critical','Q2.07','Combiner box CB-07-3 hotspot','78 °C measured · limit 60 °C · thermal image attached',4,['wo','WO-3301','Within 48 hrs']],
+            ['major','Q5.03','String 12 underperforming','18% below neighbouring strings',2,['wo','WO-3302','Clean & re-test']],
+            ['minor','Q3.02','Cooling fan filter clogged','Replaced during the visit',2,['fixed']]],
+  focus:['Q6.01 and Q6.02 (insulation resistance) were skipped. Schedule a return visit.','Check whether the hotspot in Q2.07 explains part of the string 12 loss.']},
+ {key:'aviation', label:'Aviation', form:'A-Check · Landing Gear & Cabin',
+  asset:['N482QX','ATR 72-600'], loc:'Hangar 3, Toronto Pearson', by:['Sarah Chen','Aircraft technician'], when:['Oct 5, 2026','22:30 EST'],
+  conf:{pct:94, reasons:[[1,'All 112 required tasks signed off'],[1,'Measurements recorded with limits'],[1,'Consistent with the last A-check']]},
+  outcome:['action','Action required','One main gear brake is at its wear limit. The aircraft can’t be released until it’s replaced.'],
+  rec:['Replace the #2 main gear brake (WO-7781) before release. Defer the cabin light under the MEL with a placard (WO-7782).',['Q4.11','Q7.03']],
+  params:[['Safety','amber','Needs attention','Brake at its wear limit, not beyond.',['Q4.11']],
+          ['Condition','amber','Needs attention','Brake wear pin flush. 1 emergency light inoperative.',['Q4.11','Q7.03']],
+          ['Compliance','green','Healthy','All required tasks signed off.',[]],
+          ['Readiness','red','Not ready','Release blocked by WO-7781.',[]]],
+  ov:{total:140,req:112,reqDone:112,opt:28,optDone:20,time:'6.5 hrs',att:31,wos:['WO-7781','WO-7782']},
+  findings:[['major','Q4.11','#2 main gear brake at wear limit','Wear pin flush with housing',3,['wo','WO-7781','Before release']],
+            ['minor','Q7.03','Emergency light, row 12, inoperative','Deferrable under MEL',1,['wo','WO-7782','MEL deferral']],
+            ['obs','Q4.14','Hydraulic fluid residue, left gear bay','No active leak found',2,['none']]],
+  focus:['Confirm the brake assembly is in stock so release isn’t delayed.','Make sure the MEL deferral for Q7.03 is entered in the tech log.','Recheck the left gear bay (Q4.14) at the next daily check.']},
+ {key:'clean', label:'Facilities (all clear)', form:'Monthly Fire Safety Inspection',
+  asset:['FS-B2','Fire extinguishers & exits'], loc:'Building 2, Floors 1–4', by:['Tom Rivera','Facilities technician'], when:['Oct 2, 2026','08:15 EST'],
+  conf:{pct:97, reasons:[[1,'All questions answered'],[1,'Photo for every extinguisher tag'],[1,'Matches last month’s result']]},
+  outcome:['clear','No issues found','All fire safety equipment was checked and is in working order.'],
+  rec:['No action needed. Next inspection due Nov 2, 2026.',[]],
+  params:[['Safety','green','Healthy','All extinguishers charged. Exits clear.',[]],
+          ['Condition','green','Healthy','No damage found.',[]],
+          ['Compliance','green','Healthy','All 40 required checks done.',[]],
+          ['Readiness','green','Ready','In service.',[]]],
+  ov:{total:46,req:40,reqDone:40,opt:6,optDone:6,time:'0.8 hrs',att:12,wos:[]},
+  findings:[],
+  focus:['Spot-check 2 or 3 photos to confirm each extinguisher tag was read on site.']}
+];
+var ICON={red:'i-err',amber:'i-warn',green:'i-check',grey:'i-dash'};
+var SEVL={critical:'Critical',major:'Major',minor:'Minor',obs:'Observation'};
+function q(id){return '<a class="q" href="#">'+id+'</a>';}
+function refs(a,lbl){return a&&a.length?'<div class="src">'+(lbl||'')+a.map(q).join('')+'</div>':'';}
+function render(s){
+  var o=s.ov, unans=(o.req-o.reqDone)+(o.opt-o.optDone), reqMiss=o.req-o.reqDone, done=o.reqDone+o.optDone;
+  var confCls=s.conf.pct>=85?'high':'med', confLvl=s.conf.pct>=85?'High':(s.conf.pct>=60?'Medium':'Low');
+  var counts={critical:0,major:0,minor:0,obs:0}; s.findings.forEach(function(f){counts[f[0]]++});
+  var noAct=s.findings.filter(function(f){return f[5][0]==='none'}).length;
+  var oIcon={action:'i-err',follow:'i-warn',clear:'i-check'}[s.outcome[0]];
+  var h='';
+  h+='<div class="card-head" data-slot="1 · confidence" data-src="ai"><svg class="ai-ico"><use href="#i-ai"/></svg><div class="title">Inspection AI Summary</div>'+
+     '<details class="conf '+confCls+'"><summary>Confidence: '+confLvl+' · '+s.conf.pct+'% <svg><use href="#i-cdown"/></svg></summary><div class="pop"><h6>Why '+s.conf.pct+'%</h6>'+
+     s.conf.reasons.map(function(r){return '<div class="f"><svg class="'+(r[0]?'c-green':'c-amber')+'"><use href="#'+(r[0]?'i-check':'i-warn')+'"/></svg>'+r[1]+'</div>'}).join('')+'</div></details>'+
+     '<button class="icon-btn" aria-label="Regenerate"><svg><use href="#i-refresh"/></svg></button><button class="icon-btn" aria-label="Collapse"><svg><use href="#i-chev"/></svg></button></div>';
+  h+='<div class="ctx" data-slot="2 · context" data-src="form">'+
+     '<div><div class="k">Asset</div><div class="v">'+s.asset[0]+'<small>'+s.asset[1]+'</small></div></div>'+
+     '<div><div class="k">Location</div><div class="v">'+s.loc+'</div></div>'+
+     '<div><div class="k">Performed by</div><div class="v">'+s.by[0]+'<small>'+s.by[1]+'</small></div></div>'+
+     '<div><div class="k">Completed</div><div class="v">'+s.when[0]+'<small>'+s.when[1]+'</small></div></div></div>'+
+     '<div class="formname">Form: <b>'+s.form+'</b></div>';
+  h+='<div class="outcome '+s.outcome[0]+'" data-slot="3 · outcome" data-src="ai"><svg><use href="#'+oIcon+'"/></svg><div><div class="eyebrow">'+s.outcome[1]+'</div><div class="big">'+s.outcome[2]+'</div></div></div>';
+  h+='<div class="rec" data-slot="4 · recommendation" data-src="ai"><svg><use href="#i-clip"/></svg><div><div class="k">Recommendation</div><div class="v">'+s.rec[0]+'</div>'+refs(s.rec[1],'Based on ')+'</div></div>';
+  h+='<div class="params" data-slot="5 · assessment" data-src="ai">'+s.params.map(function(p){
+     return '<div class="param '+p[1]+'"><div class="n">'+p[0]+'</div><div class="s c-'+p[1]+'"><svg><use href="#'+ICON[p[1]]+'"/></svg><span style="color:var(--text)">'+p[2]+'</span></div><div class="d">'+p[3]+'</div>'+refs(p[4])+'</div>'}).join('')+'</div>';
+  var pr=o.reqDone/o.total*100, po=o.optDone/o.total*100, pm=reqMiss/o.total*100;
+  h+='<div class="sec" data-slot="6 · overview" data-src="form"><div class="sec-head"><span class="t">Inspection Overview</span><button class="icon-btn" aria-label="Show answers"><svg><use href="#i-list"/></svg></button><button class="icon-btn tog" aria-label="Toggle"><svg class="chev"><use href="#i-chev"/></svg></button></div><div class="sec-body">'+
+     '<div class="stats">'+
+     '<div><div class="k">Total questions</div><div class="v">'+o.total+'</div><div class="sub">'+done+' answered</div></div>'+
+     '<div><div class="k">Required</div><div class="v">'+(reqMiss?'<svg class="c-red"><use href="#i-err"/></svg>':'<svg class="c-green"><use href="#i-check"/></svg>')+o.reqDone+' / '+o.req+'</div><div class="sub" style="'+(reqMiss?'color:var(--red)':'')+'">'+(reqMiss?reqMiss+' not answered':'All answered')+'</div></div>'+
+     '<div><div class="k">Optional</div><div class="v">'+o.optDone+' / '+o.opt+'</div><div class="sub">'+(o.opt-o.optDone)+' skipped</div></div>'+
+     '<div><div class="k">Unanswered</div><div class="v">'+unans+'</div><div class="sub">'+(reqMiss?reqMiss+' required':'None required')+'</div></div></div>'+
+     '<div class="qbar" role="img" aria-label="'+o.reqDone+' required answered, '+o.optDone+' optional answered, '+unans+' unanswered"><div class="track"><div class="req" style="width:'+pr+'%"></div><div class="opt" style="width:'+po+'%"></div>'+(reqMiss?'<div class="miss" style="width:'+pm+'%"></div>':'')+'</div>'+
+     '<div class="legend"><span><i style="background:var(--blue)"></i>Required answered</span><span><i style="background:#78a9ff"></i>Optional answered</span>'+(reqMiss?'<span><i style="background:var(--red)"></i>Required missing</span>':'')+'<span><i style="background:var(--track)"></i>Optional skipped</span></div></div>'+
+     '<div class="strip"><span><svg><use href="#i-clock"/></svg>Time spent <b>'+o.time+'</b></span><span><svg><use href="#i-attach"/></svg>Attachments <b>'+o.att+'</b></span><span><svg><use href="#i-wrench"/></svg>Work orders created <b>'+o.wos.length+'</b>'+(o.wos.length?': '+o.wos.map(function(w){return '<a class="wo" href="#">'+w+'</a>'}).join(' · '):'')+'</span></div></div></div>';
+  h+='<div class="sec" data-slot="7–8 · findings" data-src="form"><div class="sec-head"><span class="t">Findings</span><span class="count">'+(s.findings.length?s.findings.length+' findings'+(noAct?' · '+noAct+' without action':''):'None')+'</span><button class="icon-btn tog" aria-label="Toggle"><svg class="chev"><use href="#i-chev"/></svg></button></div><div class="sec-body">'+
+     '<div class="sevrow">'+['critical','major','minor','obs'].map(function(k){return '<div class="sevbox '+k+(counts[k]?'':' zero')+'"><span>'+SEVL[k]+'</span><b>'+counts[k]+'</b></div>'}).join('')+'</div>'+
+     (s.findings.length?s.findings.map(function(f){
+       var a=f[5], act=a[0]==='wo'?'<a class="wo" href="#">'+a[1]+'</a><small>'+a[2]+'</small>':a[0]==='fixed'?'<span class="fixed">Fixed on site</span>':'<span class="none">No action</span><small><button class="ghost-btn" style="padding:2px 8px;font-size:12px;margin-top:4px">Create work order</button></small>';
+       return '<div class="finding"><div><div class="f-top"><span class="sev '+f[0]+'">'+SEVL[f[0]]+'</span>'+q(f[1])+'<b>'+f[2]+'</b></div><div class="f-detail">'+f[3]+'</div><div class="f-ev"><svg><use href="#i-attach"/></svg>'+f[4]+' attachment'+(f[4]>1?'s':'')+'</div></div><div class="f-act">'+act+'</div></div>'}).join('')
+     :'<div class="empty"><svg><use href="#i-check"/></svg>All checks passed. No findings to report.</div>')+'</div></div>';
+  h+='<div class="sec" data-slot="9 · review focus" data-src="ai"><div class="sec-head"><span class="t">Before you approve</span><span class="count">'+s.focus.length+' to check</span><button class="icon-btn tog" aria-label="Toggle"><svg class="chev"><use href="#i-chev"/></svg></button></div><div class="sec-body"><ol class="focus">'+s.focus.map(function(t){return '<li><span>'+t+'</span></li>'}).join('')+'</ol></div></div>';
+  h+='<div class="foot" data-slot="10 · feedback" data-src="sys" style="position:relative"><button class="icon-btn" aria-label="Helpful"><svg><use href="#i-up"/></svg></button><button class="icon-btn" aria-label="Not helpful"><svg><use href="#i-down"/></svg></button><button class="icon-btn" aria-label="Copy"><svg><use href="#i-copy"/></svg></button><span class="gen">AI-generated · check before acting</span></div>';
+  var card=document.getElementById('card'); card.innerHTML=h;
+  card.querySelectorAll('.tog').forEach(function(b){b.addEventListener('click',function(){b.closest('.sec').classList.toggle('collapsed')})});
+}
+var seg=document.getElementById('industry');
+SAMPLES.forEach(function(s,i){var b=document.createElement('button');b.type='button';b.textContent=s.label;b.setAttribute('aria-pressed',i===0);
+  b.addEventListener('click',function(){seg.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});render(s)});seg.appendChild(b)});
+render(SAMPLES[0]);
+document.getElementById('slotToggle').addEventListener('change',function(e){document.getElementById('card').classList.toggle('slots',e.target.checked)});
+document.getElementById('themeBtn').addEventListener('click',function(){
+  var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme=dark?'light':'dark';
+});
+</script>
+</body>
+</html>
