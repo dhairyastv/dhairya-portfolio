@@ -203,7 +203,7 @@ table.st{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
 .srcchip.form{background:var(--blue-soft);color:var(--blue)}
 .srcchip.ai{background:var(--purple-soft);color:var(--purple)}
 .srcchip.sys{background:var(--grey-soft);color:var(--text-2)}
-.scales{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+.scales{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
 @media (max-width:860px){.scales{grid-template-columns:minmax(0,1fr)}}
 .scale{background:var(--surface);border:1px solid var(--line);padding:14px 16px;font-size:14px}
 .scale h4{margin:0 0 8px;font-size:14px;font-weight:600}
@@ -236,6 +236,7 @@ table.st{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h1.5M3 12h1.5M3 18h1.5" stroke="currentColor" stroke-width="1.6"/></symbol>
   <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 3h6v3H9zM8 10h8M8 13.5h8M8 17h5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6"/></symbol>
   <symbol id="i-attach" viewBox="0 0 24 24"><path d="M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
   <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.5 3.5a5 5 0 0 0-5.8 6.6L3 15.8 6.2 19l5.7-5.7a5 5 0 0 0 6.6-5.8l-3 3-2.8-.6-.6-2.8z" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
   <symbol id="i-err" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 6.5v7M12 16v1.8" stroke="#fff" stroke-width="2.2"/></symbol>
@@ -269,7 +270,7 @@ table.st{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
       <h4>Fixed for every organization</h4>
       <ul>
         <li><b>Section order</b>: context, outcome, recommendation, 4 assessment areas, overview, findings, review focus.</li>
-        <li><b>The 4 assessment areas</b>: Safety, Condition, Compliance, Readiness.</li>
+        <li><b>The 4 assessment areas</b>: Safety, Condition, Readiness, Trend.</li>
         <li><b>Status scales</b>: 3 outcomes, 4 severity levels, 4 colours.</li>
         <li><b>Finding layout</b>: severity, question, what was found, evidence, action.</li>
       </ul>
@@ -280,6 +281,12 @@ table.st{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
       </ul>
       <h4>Filled per inspection</h4>
       <ul><li>Everything else: form data and AI-written text.</li></ul>
+      <h4>Why Trend replaced Compliance</h4>
+      <ul>
+        <li>Compliance mostly repeated "required 90/90", which the Overview already shows.</li>
+        <li>Its real signals now live where they belong: missing required answers and a late inspection show in the <b>Overview</b> (in red), and missing evidence goes to <b>Before you approve</b>.</li>
+        <li><b>Trend</b> adds something no other slot shows: is this asset getting better or worse since its last inspection?</li>
+      </ul>
       <h4>Slot overlay key</h4>
       <div class="legend-src">
         <span><i style="border-color:var(--blue)"></i>Form data</span>
@@ -300,8 +307,8 @@ table.st{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
           <tr><td>2 · Context</td><td><span class="srcchip form">Form</span></td><td>Asset ID + name, location, performed by, completed date and time, form name.</td><td>Show "Not recorded". Never leave a blank.</td></tr>
           <tr><td>3 · Outcome</td><td><span class="srcchip ai">AI</span></td><td>One of: <b>Action required</b> · <b>Follow-up required</b> · <b>No issues found</b>. Plus one sentence on the asset's condition now.</td><td>Required questions unanswered: outcome can't be "No issues found".</td></tr>
           <tr><td>4 · Recommendation</td><td><span class="srcchip ai">AI</span></td><td>The next step: what, by when, and which work order. Must cite the questions it's based on.</td><td>No findings: "No action needed" + next due date. No citation possible: hide it.</td></tr>
-          <tr><td>5 · Assessment</td><td><span class="srcchip ai">AI</span></td><td>Safety, Condition, Compliance, Readiness. Each: status word, colour from the 4-level scale, one line of reasoning, cited questions.</td><td>Form has no related questions: grey "Not assessed".</td></tr>
-          <tr><td>6 · Overview</td><td><span class="srcchip form">Form</span></td><td>Total questions, required answered / total, optional answered / total, unanswered, time spent, attachments, work orders created (links).</td><td>Always shown. Unanswered required questions show in red.</td></tr>
+          <tr><td>5 · Assessment</td><td><span class="srcchip ai">AI</span></td><td>Safety, Condition, Readiness, Trend. Each: status word, colour from its scale, one line of reasoning, cited questions. Trend compares with the asset's previous inspection on the same form.</td><td>Form has no related questions: grey "Not assessed". No earlier inspection: Trend shows grey "First inspection".</td></tr>
+          <tr><td>6 · Overview</td><td><span class="srcchip form">Form</span></td><td>Total questions, required answered / total, optional answered / total, unanswered, time spent, schedule (on time / late), attachments, work orders created (links).</td><td>Always shown. Unanswered required questions and a late inspection show in red.</td></tr>
           <tr><td>7 · Findings summary</td><td><span class="srcchip form">Form</span> <span class="srcchip ai">AI</span></td><td>Count per severity: Critical, Major, Minor, Observation. Severity comes from the form's failure codes when present, otherwise the AI classifies it.</td><td>Zero counts shown faded, not hidden.</td></tr>
           <tr><td>8 · Finding item</td><td><span class="srcchip form">Form</span> <span class="srcchip ai">AI</span></td><td>Severity · question ID · short title · measured value vs limit, or the inspector note · evidence count · action (work order, fixed on site, or <b>no action</b>).</td><td>No findings: green "All checks passed" line.</td></tr>
           <tr><td>9 · Review focus</td><td><span class="srcchip ai">AI</span></td><td>1–3 things the reviewer should check before approving: missing evidence, readings near a limit, findings without action, skipped checks.</td><td>Always at least one item, even on a clean inspection.</td></tr>
@@ -321,6 +328,11 @@ table.st{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
         <div class="r"><i class="sw" style="background:var(--green)"></i><div><b>Healthy</b> <span>· no concerns</span></div></div>
         <div class="r"><i class="sw" style="background:var(--text-3)"></i><div><b>Not assessed</b> <span>· no related questions</span></div></div>
       </div>
+      <div class="scale"><h4>Trend (slot 5, 4th area)</h4>
+        <div class="r"><i class="sw" style="background:var(--amber-icon)"></i><div><b>Worsening / New issues</b> <span>· worse than last time</span></div></div>
+        <div class="r"><i class="sw" style="background:var(--green)"></i><div><b>Stable / Improving / As expected</b> <span>· no surprises</span></div></div>
+        <div class="r"><i class="sw" style="background:var(--text-3)"></i><div><b>First inspection</b> <span>· nothing to compare</span></div></div>
+      </div>
       <div class="scale"><h4>Finding severity (slots 7–8)</h4>
         <div class="r"><i class="sw" style="background:var(--red)"></i><div><b>Critical</b> <span>· safety risk or stops operation</span></div></div>
         <div class="r"><i class="sw" style="background:#ff832b"></i><div><b>Major</b> <span>· must be repaired</span></div></div>
@@ -335,14 +347,14 @@ table.st{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
 var SAMPLES = [
  {key:'transport', label:'Transportation', form:'Front Axle & Steering Inspection',
   asset:['TRK-0412','Scania R450 truck'], loc:'Fleet Workshop, Bay 2', by:['Mike Wilson','Technician'], when:['Oct 1, 2026','14:18 EST'],
-  conf:{pct:92, reasons:[[1,'All required questions answered'],[1,'Every failed check has photos'],[0,'No earlier inspections of this asset to compare']]},
+  conf:{pct:92, reasons:[[1,'All required questions answered'],[1,'Every failed check has photos'],[1,'Compared with the Jul 2 inspection of this asset']]},
   outcome:['action','Action required','Front steering assembly failed safety checks. The truck should stay out of service.'],
   rec:['Keep TRK-0412 out of service. Do WO-1006 and WO-1007 in one visit, then check wheel alignment.',['Q1.02','Q1.03','Q2.03','Q4.01']],
   params:[['Safety','red','Critical','Radial play at the stub axle under lateral load.',['Q1.02']],
           ['Condition','amber','Needs attention','Bushing past 1.5 mm limit. Hub bearing defective.',['Q1.03','Q2.03']],
-          ['Compliance','green','Healthy','All 90 required checks answered with evidence.',[]],
-          ['Readiness','red','Not ready','Blocked until WO-1006 is complete.',[]]],
-  ov:{total:127,req:90,reqDone:90,opt:37,optDone:25,time:'1.5 hrs',att:20,wos:['WO-1006','WO-1007']},
+          ['Readiness','red','Not ready','Blocked until WO-1006 is complete.',[]],
+          ['Trend','amber','Worsening','Kingpin play was Minor at the Jul 2 inspection. Now Critical.',['Q1.03']]],
+  ov:{total:127,req:90,reqDone:90,opt:37,optDone:25,time:'1.5 hrs',att:20,wos:['WO-1006','WO-1007'],sched:['On time',1]},
   findings:[['critical','Q1.02','Stub axle radial movement','Exceeded play limit in lateral load test',4,['wo','WO-1006','P1 Safety']],
             ['critical','Q1.03','Kingpin bushing worn','Measured beyond 1.5 mm limit · "Noticeable clunk when loaded"',3,['wo','WO-1006','P1 Safety']],
             ['major','Q2.03','Hub bearing defective','Failure code: Bearings Rotationally Defective',3,['wo','WO-1007','P2 Repair']],
@@ -355,9 +367,9 @@ var SAMPLES = [
   rec:['Increase vibration monitoring to weekly and complete the analysis in WO-55120 before the next quarterly test.',['Q3.04','Q3.05']],
   params:[['Safety','amber','Needs attention','Within operability limits. Vibration trending up.',['Q3.04']],
           ['Condition','amber','Needs attention','Outboard bearing 0.42 in/s, above the 0.325 alert level.',['Q3.04']],
-          ['Compliance','green','Healthy','Test completed within its window. All required steps signed.',[]],
-          ['Readiness','green','Operable','Flow and pressure met acceptance criteria.',['Q2.01','Q2.02']]],
-  ov:{total:72,req:64,reqDone:64,opt:8,optDone:6,time:'3.2 hrs',att:14,wos:['WO-55120']},
+          ['Readiness','green','Operable','Flow and pressure met acceptance criteria.',['Q2.01','Q2.02']],
+          ['Trend','amber','Worsening','Vibration up from 0.29 to 0.42 in/s since last quarter.',['Q3.04']]],
+  ov:{total:72,req:64,reqDone:64,opt:8,optDone:6,time:'3.2 hrs',att:14,wos:['WO-55120'],sched:['Within window (due Oct 2)',1]},
   findings:[['major','Q3.04','Outboard bearing vibration above alert level','0.42 in/s measured · alert 0.325 · action 0.70',3,['wo','WO-55120','Vibration analysis']],
             ['minor','Q4.02','Lube oil level low','Topped up during the test',1,['fixed']],
             ['obs','Q4.06','Mechanical seal weep','2 drops/min · limit 10 drops/min',2,['none']]],
@@ -369,9 +381,9 @@ var SAMPLES = [
   rec:['Isolate combiner box CB-07-3 and replace the fuse holder (WO-3301) within 48 hours. Then clean and re-test string 12.',['Q2.07','Q5.03']],
   params:[['Safety','red','Critical','Terminal hotspot at 78 °C on combiner box CB-07-3. Fire risk.',['Q2.07']],
           ['Condition','amber','Needs attention','String 12 output 18% below its neighbours.',['Q5.03']],
-          ['Compliance','amber','Needs attention','2 of 48 required checks skipped because of rain.',['Q6.01','Q6.02']],
-          ['Readiness','amber','Limited','Running at 92% capacity until repaired.',[]]],
-  ov:{total:60,req:48,reqDone:46,opt:12,optDone:9,time:'2.4 hrs',att:26,wos:['WO-3301','WO-3302']},
+          ['Readiness','amber','Limited','Running at 92% capacity until repaired.',[]],
+          ['Trend','amber','New issues','Hotspot and string loss were not present at the April check.',['Q2.07','Q5.03']]],
+  ov:{total:60,req:48,reqDone:46,opt:12,optDone:9,time:'2.4 hrs',att:26,wos:['WO-3301','WO-3302'],sched:['1 day late (rain)',0]},
   findings:[['critical','Q2.07','Combiner box CB-07-3 hotspot','78 °C measured · limit 60 °C · thermal image attached',4,['wo','WO-3301','Within 48 hrs']],
             ['major','Q5.03','String 12 underperforming','18% below neighbouring strings',2,['wo','WO-3302','Clean & re-test']],
             ['minor','Q3.02','Cooling fan filter clogged','Replaced during the visit',2,['fixed']]],
@@ -383,9 +395,9 @@ var SAMPLES = [
   rec:['Replace the #2 main gear brake (WO-7781) before release. Defer the cabin light under the MEL with a placard (WO-7782).',['Q4.11','Q7.03']],
   params:[['Safety','amber','Needs attention','Brake at its wear limit, not beyond.',['Q4.11']],
           ['Condition','amber','Needs attention','Brake wear pin flush. 1 emergency light inoperative.',['Q4.11','Q7.03']],
-          ['Compliance','green','Healthy','All required tasks signed off.',[]],
-          ['Readiness','red','Not ready','Release blocked by WO-7781.',[]]],
-  ov:{total:140,req:112,reqDone:112,opt:28,optDone:20,time:'6.5 hrs',att:31,wos:['WO-7781','WO-7782']},
+          ['Readiness','red','Not ready','Release blocked by WO-7781.',[]],
+          ['Trend','green','As expected','Brake wear matches the forecast from the last A-check.',['Q4.11']]],
+  ov:{total:140,req:112,reqDone:112,opt:28,optDone:20,time:'6.5 hrs',att:31,wos:['WO-7781','WO-7782'],sched:['On time',1]},
   findings:[['major','Q4.11','#2 main gear brake at wear limit','Wear pin flush with housing',3,['wo','WO-7781','Before release']],
             ['minor','Q7.03','Emergency light, row 12, inoperative','Deferrable under MEL',1,['wo','WO-7782','MEL deferral']],
             ['obs','Q4.14','Hydraulic fluid residue, left gear bay','No active leak found',2,['none']]],
@@ -397,9 +409,9 @@ var SAMPLES = [
   rec:['No action needed. Next inspection due Nov 2, 2026.',[]],
   params:[['Safety','green','Healthy','All extinguishers charged. Exits clear.',[]],
           ['Condition','green','Healthy','No damage found.',[]],
-          ['Compliance','green','Healthy','All 40 required checks done.',[]],
-          ['Readiness','green','Ready','In service.',[]]],
-  ov:{total:46,req:40,reqDone:40,opt:6,optDone:6,time:'0.8 hrs',att:12,wos:[]},
+          ['Readiness','green','Ready','In service.',[]],
+          ['Trend','green','Stable','Same result as the last 6 monthly checks.',[]]],
+  ov:{total:46,req:40,reqDone:40,opt:6,optDone:6,time:'0.8 hrs',att:12,wos:[],sched:['On time',1]},
   findings:[],
   focus:['Spot-check 2 or 3 photos to confirm each extinguisher tag was read on site.']}
 ];
@@ -437,7 +449,7 @@ function render(s){
      '<div><div class="k">Unanswered</div><div class="v">'+unans+'</div><div class="sub">'+(reqMiss?reqMiss+' required':'None required')+'</div></div></div>'+
      '<div class="qbar" role="img" aria-label="'+o.reqDone+' required answered, '+o.optDone+' optional answered, '+unans+' unanswered"><div class="track"><div class="req" style="width:'+pr+'%"></div><div class="opt" style="width:'+po+'%"></div>'+(reqMiss?'<div class="miss" style="width:'+pm+'%"></div>':'')+'</div>'+
      '<div class="legend"><span><i style="background:var(--blue)"></i>Required answered</span><span><i style="background:#78a9ff"></i>Optional answered</span>'+(reqMiss?'<span><i style="background:var(--red)"></i>Required missing</span>':'')+'<span><i style="background:var(--track)"></i>Optional skipped</span></div></div>'+
-     '<div class="strip"><span><svg><use href="#i-clock"/></svg>Time spent <b>'+o.time+'</b></span><span><svg><use href="#i-attach"/></svg>Attachments <b>'+o.att+'</b></span><span><svg><use href="#i-wrench"/></svg>Work orders created <b>'+o.wos.length+'</b>'+(o.wos.length?': '+o.wos.map(function(w){return '<a class="wo" href="#">'+w+'</a>'}).join(' · '):'')+'</span></div></div></div>';
+     '<div class="strip"><span><svg><use href="#i-clock"/></svg>Time spent <b>'+o.time+'</b></span><span><svg><use href="#i-cal"/></svg>Schedule <b style="'+(o.sched[1]?'':'color:var(--red)')+'">'+o.sched[0]+'</b></span><span><svg><use href="#i-attach"/></svg>Attachments <b>'+o.att+'</b></span><span><svg><use href="#i-wrench"/></svg>Work orders created <b>'+o.wos.length+'</b>'+(o.wos.length?': '+o.wos.map(function(w){return '<a class="wo" href="#">'+w+'</a>'}).join(' · '):'')+'</span></div></div></div>';
   h+='<div class="sec" data-slot="7–8 · findings" data-src="form"><div class="sec-head"><span class="t">Findings</span><span class="count">'+(s.findings.length?s.findings.length+' findings'+(noAct?' · '+noAct+' without action':''):'None')+'</span><button class="icon-btn tog" aria-label="Toggle"><svg class="chev"><use href="#i-chev"/></svg></button></div><div class="sec-body">'+
      '<div class="sevrow">'+['critical','major','minor','obs'].map(function(k){return '<div class="sevbox '+k+(counts[k]?'':' zero')+'"><span>'+SEVL[k]+'</span><b>'+counts[k]+'</b></div>'}).join('')+'</div>'+
      (s.findings.length?s.findings.map(function(f){
