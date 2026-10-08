@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Summary in Context</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f4f4; --layer:#ffffff; --layer-2:#f4f4f4; --line:#e0e0e0; --line-2:#c6c6c6;
+  --text:#161616; --text-2:#525252; --text-3:#6f6f6f;
+  --blue:#0f62fe; --blue-h:#0353e9; --blue-10:#edf5ff; --blue-20:#d0e2ff;
+  --red:#da1e28; --red-10:#fff1f1; --red-20:#ffd7d9;
+  --orange:#ff832b; --orange-ink:#8a3800; --orange-10:#fff2e8; --orange-20:#ffd9be;
+  --yellow:#f1c21b; --yellow-ink:#684e00; --yellow-10:#fcf4d6; --yellow-20:#fddc69;
+  --green:#24a148; --green-ink:#0e6027; --green-10:#defbe6; --green-20:#a7f0ba;
+  --purple:#8a3ffc; --purple-10:#f6f2ff;
+  --ai-a:#f2f6ff; --ai-b:#ffffff; --ai-line:#a6c8ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:400 14px/1.45 "IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+a{color:var(--blue)}
+
+/* option switcher (outside the product mock) */
+.switch{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line);padding:12px 16px}
+.switch-in{max-width:1400px;margin:0 auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.switch h1{font-size:16px;font-weight:600;margin:0}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line-2)}
+.seg button{border:0;border-right:1px solid var(--line-2);background:#fff;padding:8px 14px;font-size:14px;cursor:pointer;color:var(--text)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--text);color:#fff}
+.switch .desc{flex:1 1 320px;color:var(--text-2);font-size:13px;min-width:0}
+
+/* product shell */
+.shell{display:grid;grid-template-columns:48px minmax(0,1fr);min-height:100vh}
+.topbar{grid-column:1/-1;height:48px;background:#161616;color:#f4f4f4;display:flex;align-items:center;gap:16px;padding:0 16px;position:sticky;top:61px;z-index:40}
+.topbar b{font-weight:600}
+.topbar .sep{width:1px;height:20px;background:#525252}
+.topbar .mod{color:#c6c6c6}
+.topbar .sp{flex:1}
+.topbar svg{width:20px;height:20px}
+.rail{background:#161616;display:flex;flex-direction:column;align-items:center;gap:18px;padding-top:16px}
+.rail svg{width:18px;height:18px;color:#c6c6c6}
+.main{padding:20px 32px 64px;min-width:0}
+.crumb{font-size:14px}
+.crumb a{text-decoration:none}
+.ptitle{display:flex;align-items:center;justify-content:space-between;margin:6px 0 18px;gap:12px}
+.ptitle h2{font-size:28px;font-weight:400;margin:0}
+.info-btn{width:44px;height:44px;border:1px solid var(--blue);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--text)}
+.info-btn svg{width:20px;height:20px}
+
+/* AI card base */
+.ai{border:1px solid var(--ai-line);background:linear-gradient(180deg,var(--ai-a),var(--ai-b) 220px);margin-bottom:24px;position:relative}
+.ai-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.ai-head .t{font-size:18px;flex:1;min-width:160px}
+.ai-ico{width:28px;height:28px;flex:none}
+.ibtn{background:none;border:0;padding:6px;cursor:pointer;color:var(--text);display:inline-flex}
+.ibtn svg{width:20px;height:20px}
+.conf{position:relative}
+.conf summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:var(--green-20);color:var(--green-ink);border-radius:24px;padding:3px 12px;font-size:13px;font-weight:500;white-space:nowrap}
+.conf summary::-webkit-details-marker{display:none}
+.conf summary svg{width:12px;height:12px}
+.conf .pop{position:absolute;right:0;top:calc(100% + 6px);z-index:20;width:300px;max-width:calc(100vw - 40px);background:#fff;border:1px solid var(--line-2);box-shadow:0 4px 16px rgba(0,0,0,.12);padding:12px 14px;font-size:13px}
+.pop h6{margin:0 0 6px;font-size:13px;font-weight:600}
+.pop .f{display:flex;gap:8px;margin:5px 0;color:var(--text-2)}
+.pop .f svg{width:16px;height:16px;flex:none;margin-top:1px}
+.ai-body{padding:16px 20px}
+.ai-foot{display:flex;gap:20px;align-items:center;padding:12px 20px;border-top:1px solid var(--line)}
+.ai-foot .gen{margin-left:auto;font-size:12px;color:var(--text-3)}
+
+/* shared bits */
+.qref{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--blue);background:var(--blue-10);border:1px solid var(--blue-20);padding:0 6px;text-decoration:none;white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center;gap:3px;line-height:20px}
+.qref:hover{background:var(--blue-20)}
+.qref svg{width:10px;height:10px}
+.refs{display:flex;gap:6px;flex-wrap:wrap}
+.wo{font-weight:500;text-decoration:none;border-bottom:1px solid var(--blue-20);white-space:nowrap}
+.wo:hover{border-bottom-color:var(--blue)}
+.rec{display:flex;gap:12px;border:1px solid var(--blue-20);border-left:3px solid var(--blue);background:#fff;padding:14px 16px}
+.rec>svg{width:20px;height:20px;flex:none;color:var(--blue);margin-top:2px}
+.rec .k{font-size:12px;color:var(--text-2)}
+.rec .v{font-size:15px;font-weight:600;margin:2px 0 8px}
+.tag{display:inline-flex;align-items:center;gap:5px;border-radius:24px;padding:2px 10px;font-size:12px;font-weight:500;white-space:nowrap}
+.tag.red{background:var(--red-20);color:#a2191f}
+.tag.orange{background:var(--orange-20);color:var(--orange-ink)}
+.tag.yellow{background:var(--yellow-20);color:var(--yellow-ink)}
+.tag.grey{background:#e0e0e0;color:var(--text)}
+.tag.green{background:var(--green-20);color:var(--green-ink)}
+.tag.blue{background:var(--blue-20);color:#002d9c}
+.tag .d{width:8px;height:8px;border-radius:50%}
+.ico{width:18px;height:18px;flex:none}
+.c-red{color:var(--red)}.c-orange{color:var(--orange)}.c-yellow{color:var(--yellow)}.c-green{color:var(--green)}.c-grey{color:var(--text-3)}
+.kf{display:inline-block;font:500 12px/1.5 "IBM Plex Mono",monospace;background:var(--layer-2);border:1px solid var(--line);padding:0 6px;margin:6px 0 4px}
+.btn{border:1px solid var(--blue);background:var(--blue);color:#fff;font-size:13px;padding:6px 12px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--blue)}
+.btn.ghost:hover{background:var(--blue-10)}
+.lbl{font-size:12px;color:var(--text-2)}
+
+/* params 2x2 (option A) */
+.p2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.pc{background:#fff;border:1px solid var(--line);border-left:3px solid var(--line-2);padding:14px 16px;display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px}
+.pc.red{border-left-color:var(--red)}.pc.orange{border-left-color:var(--orange)}.pc.yellow{border-left-color:var(--yellow)}.pc.green{border-left-color:var(--green)}
+.pc .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.pc .n{font-weight:600}
+.pc .st{color:var(--text-2)}
+.pc .why{margin-top:2px}
+.pc .bot{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+
+/* overview strip */
+.ov{display:flex;flex-wrap:wrap;gap:0;margin-top:16px;background:#fff;border:1px solid var(--line)}
+.ov>div{padding:10px 16px;border-right:1px solid var(--line);flex:1 1 140px}
+.ov>div:last-child{border-right:0}
+.ov .v{font-size:16px}
+.ov .v small{font-size:12px;color:var(--text-2)}
+
+/* findings */
+.sec-t{display:flex;align-items:center;gap:12px;margin:20px 0 8px}
+.sec-t h3{font-size:15px;font-weight:600;margin:0;flex:1}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.chip{border:1px solid var(--line-2);background:#fff;border-radius:24px;padding:3px 12px;font-size:13px;cursor:pointer;color:var(--text)}
+.chip[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:#fff}
+.flist{background:#fff;border:1px solid var(--line)}
+.fr{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:start}
+.fr:last-child{border-bottom:0}
+.fr .ttl{font-weight:600}
+.fr .det{color:var(--text-2);font-size:13px}
+.fr .act{text-align:right;display:flex;flex-direction:column;gap:4px;align-items:flex-end;font-size:13px}
+.fr .none{color:var(--red);font-weight:500}
+.fr.hide{display:none}
+
+/* option B: compact strip */
+.strip{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:14px 20px}
+.strip .rtxt{flex:1 1 360px;min-width:0}
+.strip .rtxt b{font-weight:600}
+.mini{display:flex;gap:6px;flex-wrap:wrap}
+.mini .m{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);padding:3px 10px;font-size:12px;white-space:nowrap}
+.mini .m .d{width:8px;height:8px;border-radius:50%}
+.more{display:none;border-top:1px solid var(--line);padding:16px 20px}
+.ai.open .more{display:block}
+.ai.open .more-btn .chev{transform:rotate(180deg)}
+.chev{transition:transform .15s}
+.prow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:#fff;border:1px solid var(--line)}
+.prow>div{padding:12px 14px;border-right:1px solid var(--line)}
+.prow>div:last-child{border-right:0}
+.prow .n{font-size:12px;color:var(--text-2)}
+.prow .st{font-weight:600;display:flex;gap:6px;align-items:center;margin:2px 0}
+.prow .why{font-size:13px}
+
+/* option C: split */
+.split{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:0}
+.split>.l{padding:16px 20px;border-right:1px solid var(--line)}
+.split>.r{padding:16px 20px;background:#fff}
+.pl{display:grid;gap:0;margin-top:14px;background:#fff;border:1px solid var(--line)}
+.pl>div{display:grid;grid-template-columns:120px 130px minmax(0,1fr);gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);align-items:baseline}
+.pl>div:last-child{border-bottom:0}
+.pl .n{font-weight:600}
+.pl .st{display:flex;gap:6px;align-items:center;font-weight:500}
+.pl .st svg{transform:translateY(3px)}
+.pl .why{font-size:13px;color:var(--text-2)}
+.prog{display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--text-2);flex-wrap:wrap}
+.prog .bar{flex:1 1 160px;height:6px;background:#e0e0e0;display:flex;min-width:120px}
+.prog .bar i{display:block;height:100%}
+.prog b{color:var(--text);font-weight:500}
+.exc{list-style:none;margin:8px 0 0;padding:0;counter-reset:e}
+.exc li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);counter-increment:e;align-items:start}
+.exc li:last-child{border-bottom:0}
+.exc li::before{content:counter(e);width:22px;height:22px;border-radius:50%;background:var(--layer-2);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.exc .ttl{font-weight:600}
+.exc .det{font-size:13px;color:var(--text-2)}
+.exc .act{text-align:right;font-size:13px;display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+
+/* option D: tiles row + navigator */
+.p4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+.t4{background:#fff;border:1px solid var(--line);border-top:3px solid var(--line-2);padding:10px 12px}
+.t4.red{border-top-color:var(--red)}.t4.orange{border-top-color:var(--orange)}.t4.yellow{border-top-color:var(--yellow)}.t4.green{border-top-color:var(--green)}
+.t4 .n{font-size:12px;color:var(--text-2)}
+.t4 .st{font-weight:600;display:flex;gap:6px;align-items:center}
+.t4 .why{font-size:13px;margin-top:4px}
+.nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px;padding:10px 14px;background:#fff;border:1px solid var(--line)}
+.nav .txt{flex:1 1 260px}
+.nav .sev{display:flex;gap:6px;flex-wrap:wrap}
+
+/* form preview */
+.form{background:#fff}
+.fsec{display:flex;align-items:center;gap:20px;padding:18px 28px;border-bottom:1px solid var(--line)}
+.fsec .num{font-size:26px}
+.fsec .dot,.fq .dot{width:7px;height:7px;border-radius:50%;background:var(--blue)}
+.fsec .cnt{margin-left:auto;font-size:13px;color:var(--text-2)}
+.fq{margin:0 28px 0 64px;padding:14px 0 18px;border-bottom:1px solid var(--line);position:relative;scroll-margin-top:130px}
+.fq .qh{display:flex;align-items:center;gap:18px;font-size:15px}
+.fq .qh .qn{width:46px}
+.fq .prompt{font-size:12px;color:var(--text-2);margin:14px 0 2px 10px}
+.fq .inp{margin:0 0 0 10px;border-bottom:1px solid var(--text-3);padding:8px 0;min-height:36px;display:flex;align-items:center;justify-content:space-between}
+.fq .inp svg{width:18px;height:18px;color:var(--text)}
+.fq .note{margin:8px 0 0 10px;font-size:13px;color:var(--text-2);font-style:italic}
+.radios{display:flex;gap:24px;margin:14px 0 0 10px;flex-wrap:wrap}
+.radios span{display:inline-flex;align-items:center;gap:10px;font-size:14px}
+.radios i{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--text);display:inline-block;position:relative}
+.radios i.on::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--text)}
+.fq.flash{animation:flash 1.8s ease}
+@keyframes flash{0%,40%{background:var(--yellow-10);box-shadow:-24px 0 0 var(--yellow-10),24px 0 0 var(--yellow-10)}100%{background:transparent}}
+.aiflag{display:none;margin:10px 0 0 10px;padding:8px 12px;border:1px solid var(--ai-line);background:var(--ai-a);font-size:13px;align-items:flex-start;gap:10px}
+.aiflag svg{width:16px;height:16px;flex:none;margin-top:2px;color:var(--purple)}
+.flags .aiflag{display:flex}
+.flags .fq.has-flag{border-left:3px solid var(--purple);padding-left:12px;margin-left:61px}
+.collapsed-sec{padding:14px 28px;border-bottom:1px solid var(--line);color:var(--text-2);font-size:13px;display:flex;gap:20px;align-items:center}
+.collapsed-sec .num{font-size:20px;color:var(--text)}
+
+/* notes */
+.design-notes{max-width:1400px;margin:0 auto;padding:0 16px}
+.dn{background:#fff;border:1px solid var(--line);padding:14px 18px;margin:16px 0 0;font-size:13px;display:none}
+.dn.on{display:block}
+.dn h4{margin:0 0 4px;font-size:14px}
+.dn ul{margin:4px 0 0;padding-left:18px}
+.dn li{margin:3px 0;color:var(--text-2)}
+.dn li b{color:var(--text)}
+
+@media (max-width:900px){
+  .split{grid-template-columns:minmax(0,1fr)}
+  .split>.l{border-right:0;border-bottom:1px solid var(--line)}
+  .p4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .prow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .prow>div:nth-child(2){border-right:0}
+  .prow>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+}
+@media (max-width:700px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .rail{display:none}
+  .main{padding:16px}
+  .p2{grid-template-columns:minmax(0,1fr)}
+  .fr{grid-template-columns:minmax(0,1fr)}
+  .fr .act{align-items:flex-start;text-align:left}
+  .pl>div{grid-template-columns:minmax(0,1fr)}
+  .fq{margin:0 12px 0 20px}
+  .flags .fq.has-flag{margin-left:17px}
+  .fsec{padding:16px 12px}
+  .topbar .mod,.topbar .sep{display:none}
+  .ai-head,.ai-body,.ai-foot,.strip,.more,.prog,.split>.l,.split>.r{padding-left:14px;padding-right:14px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-ai" viewBox="0 0 32 32"><path d="M4 4h18v2H6v20h10v2H4z" fill="currentColor"/><text x="7.5" y="18" font-family="IBM Plex Sans, sans-serif" font-weight="600" font-size="9" fill="currentColor">AI</text><path d="M25 18l1.6 3.4 3.6.4-2.7 2.5.8 3.6L25 26l-3.3 1.9.8-3.6-2.7-2.5 3.6-.4z" fill="currentColor"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-cdown" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 3h6v3H9zM8 10h8M8 13.5h8M8 17h5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-err" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 6.5v7M12 16v1.8" stroke="#fff" stroke-width="2.2"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 2.5l10.5 19h-21z" fill="currentColor"/><path d="M12 9v6M12 17v1.8" stroke="#161616" stroke-width="2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="i-dash" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-down-arrow" viewBox="0 0 24 24"><path d="M12 4v15M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2l2.2 6.3L20.5 10l-6.3 2.2L12 18.5l-2.2-6.3L3.5 10l6.3-1.7zM19 16l.9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9z" fill="currentColor"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 10v11H3V10zM7 10l4-7c1.7 0 2.5 1 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.3 7.5A2.5 2.5 0 0 1 17.2 21H7" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M17 14V3h4v11zM17 14l-4 7c-1.7 0-2.5-1-2.2-2.8L11.4 15H5a2 2 0 0 1-2-2.3L4.3 5.2A2.5 2.5 0 0 1 6.8 3H17" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><path d="M8 8h13v13H8z M4 16V3h13" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 16.5v1" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 18c1.2-2 3.2-3 5.5-3s4.3 1 5.5 3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v6M12 7.5v1" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-clear" viewBox="0 0 24 24"><path d="M4 20L20 4M7 4l13 13M4 7l13 13" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+</defs></svg>
+
+<div class="switch">
+  <div class="switch-in">
+    <h1>AI Summary on the inspection page</h1>
+    <div class="seg" id="opts" role="group" aria-label="Design option">
+      <button type="button" aria-pressed="true" data-o="a">A · Refined card</button>
+      <button type="button" aria-pressed="false" data-o="b">B · Compact strip</button>
+      <button type="button" aria-pressed="false" data-o="c">C · Summary + exceptions</button>
+      <button type="button" aria-pressed="false" data-o="d">D · Summary + flags in form</button>
+    </div>
+    <div class="desc" id="optdesc"></div>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="topbar">
+    <svg><use href="#i-menu"/></svg><b>IBM Maximo Application Suite</b><span class="sep"></span><span class="mod">Manage</span><span class="sp"></span><svg><use href="#i-help"/></svg><svg><use href="#i-user"/></svg>
+  </div>
+  <nav class="rail" aria-hidden="true"><svg><use href="#i-search"/></svg><svg><use href="#i-home"/></svg><svg><use href="#i-clip"/></svg></nav>
+  <main class="main">
+    <div class="crumb"><a href="#">Inspection Forms</a> /</div>
+    <div class="ptitle"><h2>Bridge Inspection Report</h2><span class="info-btn" title="Asset, location, inspector and date live here"><svg><use href="#i-info"/></svg></span></div>
+
+    <div id="summary"></div>
+
+    <section class="form" id="form">
+      <div class="fsec"><span class="num">1.</span><span class="dot"></span><span>General</span><span class="cnt">4 of 4 shown</span></div>
+
+      <div class="fq" id="q-1.01"><div class="qh"><span class="qn">1.01.</span><span class="dot"></span>10 - Paint</div>
+        <div class="prompt">Years?</div><div class="inp"><span>12</span><svg><use href="#i-clear"/></svg></div>
+        <div class="radios"><span><i></i>6</span><span><i></i>5</span><span><i></i>4</span><span><i class="on"></i>3</span><span><i></i>2</span><span><i></i>1</span></div>
+        <div class="aiflag"><svg><use href="#i-spark"/></svg><div><span class="tag grey">Observation</span> Paint system at 12 years, rated 3. Plan a repaint in the next capital cycle. <span class="lbl">No work order needed now.</span></div></div>
+      </div>
+
+      <div class="fq" id="q-1.02"><div class="qh"><span class="qn">1.02.</span><span class="dot"></span>20 - Clearance signs</div>
+        <div class="radios"><span><i></i>1</span><span><i class="on"></i>2</span><span><i></i>3</span><span><i></i>4</span></div>
+        <div class="note">Inspector note: "North approach sign bent, partly unreadable."</div>
+        <div class="aiflag"><svg><use href="#i-spark"/></svg><div><span class="tag yellow">Minor</span> Damaged clearance sign. Covered by <a class="wo" href="#">WO-2292</a>.</div></div>
+      </div>
+
+      <div class="fq" id="q-1.03"><div class="qh"><span class="qn">1.03.</span><span class="dot"></span>30 - UG CLR</div>
+        <div class="inp"><span>4.9 m</span><svg><use href="#i-clear"/></svg></div>
+        <div class="radios"><span><i class="on"></i>4</span><span><i></i>3</span><span><i></i>2</span><span><i></i>1</span></div>
+      </div>
+
+      <div class="fq" id="q-1.04"><div class="qh"><span class="qn">1.04.</span><span class="dot"></span>40 - Load Limit</div>
+        <div class="prompt">Tons?</div><div class="inp"><span>20</span><svg><use href="#i-clear"/></svg></div>
+        <div class="aiflag"><svg><use href="#i-spark"/></svg><div><span class="tag orange">Major</span> Posted limit is 20 t, but the girder condition in 3.04 suggests about 15 t. <b>No work order yet.</b> <button class="btn ghost" style="padding:2px 8px;font-size:12px;margin-left:4px">Create work order</button></div></div>
+      </div>
+
+      <div class="collapsed-sec"><span class="num">2.</span><span>Deck · 22 questions · no findings</span></div>
+
+      <div class="fsec"><span class="num">3.</span><span class="dot"></span><span>Superstructure</span><span class="cnt">2 of 18 shown</span></div>
+      <div class="fq" id="q-3.04"><div class="qh"><span class="qn">3.04.</span><span class="dot"></span>Girder G3 condition</div>
+        <div class="radios"><span><i></i>6</span><span><i></i>5</span><span><i></i>4</span><span><i></i>3</span><span><i class="on"></i>2</span><span><i></i>1</span></div>
+        <div class="note">Inspector note: "Web section loss approx. 25% at north bearing. 4 photos."</div>
+        <div class="aiflag"><svg><use href="#i-spark"/></svg><div><span class="tag red">Critical</span> Section loss reduces load capacity. Rating dropped from 4 (Oct 2024) to 2. Covered by <a class="wo" href="#">WO-2291</a>.</div></div>
+      </div>
+      <div class="fq" id="q-3.06"><div class="qh"><span class="qn">3.06.</span><span class="dot"></span>Bearings, pier 2</div>
+        <div class="radios"><span><i></i>6</span><span><i></i>5</span><span><i></i>4</span><span><i></i>3</span><span><i class="on"></i>2</span><span><i></i>1</span></div>
+        <div class="note">Inspector note: "Heavy corrosion, bearing plate seized."</div>
+        <div class="aiflag"><svg><use href="#i-spark"/></svg><div><span class="tag orange">Major</span> Seized bearing adds stress to the girders. Covered by <a class="wo" href="#">WO-2291</a>.</div></div>
+      </div>
+      <div class="collapsed-sec"><span class="num">4.</span><span>Substructure · 30 questions · no findings</span></div>
+    </section>
+  </main>
+</div>
+
+<div class="design-notes" style="padding-bottom:40px">
+  <div class="dn" data-n="a"><h4>A · Refined card</h4><ul>
+    <li>Your layout, cleaned up. The asset, location and inspector row is gone because the page title and the (i) panel already show it.</li>
+    <li>The Overview bullets are removed. They repeated the cards and the findings.</li>
+    <li>Every question reference is one chip ("1.04") in the form's own numbering. Clicking it scrolls to the question below and highlights it.</li>
+    <li>Findings are filterable by severity. Each row shows its work order or "No work order".</li>
+  </ul></div>
+  <div class="dn" data-n="b"><h4>B · Compact strip</h4><ul>
+    <li>Closed, the summary takes one band: outcome, the recommendation and 4 status chips. The form starts higher on the page.</li>
+    <li>"Show details" opens the 4 areas in one row plus the findings list.</li>
+    <li>Best when reviewers open many inspections a day and only need the verdict.</li>
+  </ul></div>
+  <div class="dn" data-n="c"><h4>C · Summary + exceptions</h4><ul>
+    <li>Left: the decision (recommendation and 4 areas as compact rows). Right: a numbered list of exceptions to review, each a jump link into the form.</li>
+    <li>Completion becomes one progress line under the header instead of a stat block.</li>
+    <li>Reads like a review checklist: work down the right column, approve at the end.</li>
+  </ul></div>
+  <div class="dn" data-n="d"><h4>D · Summary + flags in form</h4><ul>
+    <li>The card holds only the decision: recommendation and 4 areas. Findings aren't listed in the card at all.</li>
+    <li>Instead the AI flags each finding right inside the form, under the question it belongs to. Nothing is said twice.</li>
+    <li>"Next finding" steps through the flags. The summary becomes a guide to the form.</li>
+  </ul></div>
+</div>
+
+<script>
+var P=[
+ {n:'Safety',l:'red',st:'Critical',kf:'G3 rated 2 of 6',why:'Girder section loss lowers load capacity below the posted limit.',refs:['3.04','1.04']},
+ {n:'Operations',l:'orange',st:'Limited',kf:'Restrict to 15 t',why:'Stays open with a reduced load limit until WO-2291 is done.',refs:[],link:'WO-2291'},
+ {n:'Asset health',l:'orange',st:'Degrading',kf:'3 elements rated ≤ 3',why:'Corrosion on girder and bearings. Paint at end of life.',refs:['3.04','3.06','1.01']},
+ {n:'Trend',l:'orange',st:'Worsening',kf:'G3: 4 → 2',why:'Girder G3 dropped two ratings since the last inspection.',refs:['3.04'],link:'Oct 2024 inspection'}
+];
+var F=[
+ {sev:'critical',q:'3.04',t:'Girder G3 section loss',d:'Rated 2 · about 25% web loss at north bearing · 4 photos',a:['wo','WO-2291','P1 · 30 days']},
+ {sev:'major',q:'1.04',t:'Load limit posted too high',d:'Posted 20 t · girder condition suggests about 15 t',a:['none']},
+ {sev:'major',q:'3.06',t:'Pier 2 bearing seized',d:'Rated 2 · heavy corrosion',a:['wo','WO-2291','P1 · 30 days']},
+ {sev:'minor',q:'1.02',t:'Clearance sign damaged',d:'Rated 2 · north approach sign bent',a:['wo','WO-2292','P3']},
+ {sev:'obs',q:'1.01',t:'Paint system ageing',d:'12 years · rated 3 · plan repaint',a:['ok']}
+];
+var SEV={critical:['Critical','red'],major:['Major','orange'],minor:['Minor','yellow'],obs:['Observation','grey']};
+var ICON={red:'i-err',orange:'i-warn',yellow:'i-warn',green:'i-check',grey:'i-dash'};
+var REC='Post a 15 t load limit now and repair girder G3 and the pier 2 bearing within 30 days (WO-2291). Replace the damaged clearance sign (WO-2292).';
+var RECREFS=['3.04','3.06','1.04','1.02'];
+var OUT=['Action required','Girder G3 has lost section. The posted load limit is no longer safe.'];
+
+function qr(q){return '<a class="qref" data-q="'+q+'" href="#q-'+q+'" title="Go to question '+q+'">'+q+'<svg><use href="#i-down-arrow"/></svg></a>';}
+function refs(a){return a.length?'<span class="refs">'+a.map(qr).join('')+'</span>':'';}
+function wo(id){return '<a class="wo" href="#">'+id+'</a>';}
+function head(extra){
+  return '<div class="ai-head"><svg class="ai-ico"><use href="#i-ai"/></svg><span class="t">Inspection AI Summary</span>'+(extra||'')+
+  '<details class="conf"><summary>Confidence: High · 92% <svg><use href="#i-cdown"/></svg></summary><div class="pop"><h6>Why 92%</h6>'+
+  '<div class="f"><svg class="c-green"><use href="#i-check"/></svg>All 90 required questions answered</div>'+
+  '<div class="f"><svg class="c-green"><use href="#i-check"/></svg>Every finding has photos or an inspector note</div>'+
+  '<div class="f"><svg class="c-green"><use href="#i-check"/></svg>Compared with the Oct 2024 inspection</div>'+
+  '<div class="f"><svg class="c-yellow"><use href="#i-warn"/></svg>Load limit estimate is inferred from ratings, not a load rating calculation</div></div></details>'+
+  '<button class="ibtn" aria-label="Regenerate"><svg><use href="#i-refresh"/></svg></button><button class="ibtn" aria-label="Collapse"><svg><use href="#i-chev"/></svg></button></div>';
+}
+function foot(){return '<div class="ai-foot"><button class="ibtn" aria-label="Helpful"><svg><use href="#i-up"/></svg></button><button class="ibtn" aria-label="Not helpful"><svg><use href="#i-down"/></svg></button><button class="ibtn" aria-label="Copy"><svg><use href="#i-copy"/></svg></button><span class="gen">AI-generated · check before approving</span></div>';}
+function recBlock(){return '<div class="rec"><svg><use href="#i-clip"/></svg><div><div class="k">Recommendation · <span style="color:var(--red);font-weight:600">'+OUT[0]+'</span></div><div class="v">'+REC+'</div>'+refs(RECREFS)+'</div></div>';}
+function stIcon(l){return '<svg class="ico c-'+l+'"><use href="#'+ICON[l]+'"/></svg>';}
+function act(a){
+  if(a[0]==='wo')return wo(a[1])+'<span class="lbl">'+a[2]+'</span>';
+  if(a[0]==='ok')return '<span class="lbl">No action needed</span>';
+  return '<span class="none">No work order</span><button class="btn ghost" style="padding:2px 8px;font-size:12px">Create</button>';
+}
+function counts(){var c={critical:0,major:0,minor:0,obs:0};F.forEach(function(f){c[f.sev]++});return c;}
+function findings(){
+  var c=counts();
+  return '<div class="sec-t"><h3>Findings</h3><span class="lbl">'+F.length+' findings · 1 without work order</span></div>'+
+   '<div class="chips"><button class="chip" aria-pressed="true" data-f="all">All ('+F.length+')</button>'+
+   ['critical','major','minor','obs'].map(function(k){return '<button class="chip" aria-pressed="false" data-f="'+k+'">'+SEV[k][0]+' ('+c[k]+')</button>'}).join('')+'</div>'+
+   '<div class="flist">'+F.map(function(f){return '<div class="fr" data-k="'+f.sev+'"><span><span class="tag '+SEV[f.sev][1]+'">'+SEV[f.sev][0]+'</span></span><div><div class="ttl">'+f.t+'</div><div class="det">'+f.d+'</div><div style="margin-top:6px">'+qr(f.q)+'</div></div><div class="act">'+act(f.a)+'</div></div>'}).join('')+'</div>';
+}
+var OV='<div class="ov"><div><div class="lbl">Answered</div><div class="v">115 / 127 <small>12 optional skipped</small></div></div><div><div class="lbl">Required</div><div class="v">90 / 90 <small>all answered</small></div></div><div><div class="lbl">Attachments</div><div class="v">20</div></div><div><div class="lbl">Time spent</div><div class="v">1.5 hrs</div></div><div><div class="lbl">Work orders</div><div class="v">'+wo('WO-2291')+' · '+wo('WO-2292')+'</div></div></div>';
+
+var R={
+ a:function(){
+   return '<section class="ai">'+head()+'<div class="ai-body">'+recBlock()+
+   '<div class="p2">'+P.map(function(p){return '<div class="pc '+p.l+'">'+stIcon(p.l)+'<div><div class="top"><span class="n">'+p.n+'</span>'+(p.link?'<a class="wo" style="font-size:12px" href="#">'+p.link+'</a>':'')+'</div><div class="st">'+p.st+'</div><span class="kf">'+p.kf+'</span><div class="why">'+p.why+'</div>'+(p.refs.length?'<div class="bot">'+refs(p.refs)+'</div>':'')+'</div></div>'}).join('')+'</div>'+
+   OV+findings()+'</div>'+foot()+'</section>';
+ },
+ b:function(){
+   return '<section class="ai" id="aib">'+head()+
+   '<div class="strip"><span class="tag red"><span class="d" style="background:var(--red)"></span>'+OUT[0]+'</span><div class="rtxt"><b>'+REC+'</b></div></div>'+
+   '<div class="strip" style="padding-top:0"><div class="mini">'+P.map(function(p){return '<span class="m"><span class="d" style="background:var(--'+p.l+')"></span>'+p.n+': <b>'+p.st+'</b></span>'}).join('')+'<span class="m">5 findings · 1 without work order</span></div><span style="flex:1"></span><button class="btn ghost more-btn" id="moreBtn" type="button">Show details <svg class="chev" style="width:14px;height:14px;vertical-align:-2px;transform:rotate(180deg)"><use href="#i-chev"/></svg></button></div>'+
+   '<div class="more"><div class="prow">'+P.map(function(p){return '<div><div class="n">'+p.n+'</div><div class="st">'+stIcon(p.l)+p.st+'</div><span class="kf">'+p.kf+'</span><div class="why">'+p.why+'</div>'+(p.refs.length?'<div style="margin-top:6px">'+refs(p.refs)+'</div>':'')+'</div>'}).join('')+'</div>'+
+   findings()+'<p class="lbl" style="margin:12px 0 0">115 of 127 answered · 90 of 90 required · 20 attachments · 1.5 hrs</p></div>'+foot()+'</section>';
+ },
+ c:function(){
+   return '<section class="ai">'+head()+
+   '<div class="prog"><span><b>115</b> of 127 answered</span><div class="bar" title="90 required, 25 optional answered, 12 optional skipped"><i style="width:70.9%;background:var(--blue)"></i><i style="width:19.7%;background:#78a9ff"></i></div><span><b>90/90</b> required</span><span><b>20</b> attachments</span><span><b>1.5</b> hrs</span></div>'+
+   '<div class="split"><div class="l">'+recBlock()+
+   '<div class="pl">'+P.map(function(p){return '<div><span class="n">'+p.n+'</span><span class="st">'+stIcon(p.l)+p.st+'</span><span class="why"><span class="kf" style="margin:0 6px 0 0">'+p.kf+'</span>'+p.why+' '+(p.link?'<a class="wo" href="#">'+p.link+'</a>':'')+'</span></div>'}).join('')+'</div></div>'+
+   '<div class="r"><div class="sec-t" style="margin-top:0"><h3>Exceptions to review</h3><span class="lbl">5 · most severe first</span></div><ol class="exc">'+
+   F.map(function(f){return '<li><div><div><span class="tag '+SEV[f.sev][1]+'" style="margin-right:6px">'+SEV[f.sev][0]+'</span><span class="ttl">'+f.t+'</span></div><div class="det">'+f.d+'</div><div style="margin-top:4px">'+qr(f.q)+'</div></div><div class="act">'+act(f.a)+'</div></li>'}).join('')+
+   '</ol></div></div>'+foot()+'</section>';
+ },
+ d:function(){
+   var c=counts();
+   return '<section class="ai">'+head()+'<div class="ai-body">'+recBlock()+
+   '<div class="p4">'+P.map(function(p){return '<div class="t4 '+p.l+'"><div class="n">'+p.n+'</div><div class="st">'+stIcon(p.l)+p.st+'</div><span class="kf">'+p.kf+'</span><div class="why">'+p.why+'</div></div>'}).join('')+'</div>'+
+   '<div class="nav"><svg class="ico" style="color:var(--purple)"><use href="#i-spark"/></svg><div class="txt"><b>5 findings flagged in the form below</b> · 1 without a work order<div class="sev" style="margin-top:4px">'+['critical','major','minor','obs'].map(function(k){return '<span class="tag '+SEV[k][1]+'">'+SEV[k][0]+' '+c[k]+'</span>'}).join('')+'</div></div><button class="btn ghost" id="prevF" type="button">Previous</button><button class="btn" id="nextF" type="button">Next finding</button></div>'+
+   '<p class="lbl" style="margin:10px 0 0">115 of 127 answered · 90 of 90 required · 20 attachments · 1.5 hrs · '+wo('WO-2291')+' · '+wo('WO-2292')+'</p>'+
+   '</div>'+foot()+'</section>';
+ }
+};
+var DESC={a:'Your card, cleaned: no repeated metadata, no repeated bullets, every reference jumps into the form.',b:'One band when closed. Details on demand.',c:'Decision on the left, a review checklist on the right.',d:'The card makes the call. The findings are flagged inside the form itself.'};
+var ORDER=['3.04','1.04','3.06','1.02','1.01'], idx=-1;
+function jump(q){var el=document.getElementById('q-'+q); if(!el)return; el.scrollIntoView({behavior:'smooth',block:'start'}); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');}
+function render(o){
+  document.getElementById('summary').innerHTML=R[o]();
+  document.getElementById('optdesc').textContent=DESC[o];
+  document.body.classList.toggle('flags',o==='d');
+  document.querySelectorAll('.fq').forEach(function(f){f.classList.toggle('has-flag',o==='d'&&!!f.querySelector('.aiflag'))});
+  document.querySelectorAll('.dn').forEach(function(d){d.classList.toggle('on',d.dataset.n===o)});
+  var s=document.getElementById('summary');
+  s.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){
+    s.querySelectorAll('.chip').forEach(function(x){x.setAttribute('aria-pressed',x===c)});
+    s.querySelectorAll('.fr').forEach(function(r){r.classList.toggle('hide',!(c.dataset.f==='all'||r.dataset.k===c.dataset.f))});
+  })});
+  var mb=document.getElementById('moreBtn'); if(mb)mb.addEventListener('click',function(){var a=document.getElementById('aib');a.classList.toggle('open');mb.firstChild.textContent=a.classList.contains('open')?'Hide details ':'Show details ';});
+  var nx=document.getElementById('nextF'),pv=document.getElementById('prevF'); idx=-1;
+  if(nx){nx.addEventListener('click',function(){idx=(idx+1)%ORDER.length;jump(ORDER[idx]);nx.textContent='Next finding ('+(idx+1)+'/'+ORDER.length+')'});
+         pv.addEventListener('click',function(){idx=(idx-1+ORDER.length)%ORDER.length;jump(ORDER[idx]);nx.textContent='Next finding ('+(idx+1)+'/'+ORDER.length+')'});}
+}
+document.addEventListener('click',function(e){var a=e.target.closest('.qref'); if(!a)return; e.preventDefault(); jump(a.dataset.q);});
+document.querySelectorAll('#opts button').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('#opts button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});render(b.dataset.o);window.scrollTo({top:0})})});
+render('a');
+</script>
+</body>
+</html>
